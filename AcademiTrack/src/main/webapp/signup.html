@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
+-->
+<html>
+<head>
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+
+        <div class="logo-circle">
+            <img src="Logo.png" alt="AcademiTrack Logo" class="Logo-img">
+        </div>
+        
+        <div style="align-content:center ">
+            <h1>AcademiTrack</h1>
+            
+        </div>
+        
+        <div class="card">
+            <h2>Create Account</h2>
+            <form action="SignupServlet" method="POST">
+                
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="fullName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Department</label>
+                    <select name="department">
+                        <option>Select Department</option>
+                        <option value="Computer">Computer Engineering</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="Mechanical">Mechanical Engineering</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Create a password" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="btn">Create Account</button>
+            </form>
+
+            <p class="switch">Already have an account? <a href="index.html">Sign In</a></p>
+        </div>
+
+        <p class="copyright">© 2026 University Academic System. All rights reserved.</p>
+
+    </div>
+</body>
+</html>

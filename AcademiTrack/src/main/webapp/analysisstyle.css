@@ -1,0 +1,298 @@
+/* AcademiTrack Professional Stylesheet
+    Updated: 29-Mar-2026
+    Features: Dual-stat boxes, Weighted CGPA layouts, and Honours Section
+*/
+
+:root {
+    --primary-blue: #283593;
+    --secondary-blue: #3f51b5;
+    --honors-purple: #6a1b9a; /* New color for Honors section */
+    --bg-light: #f4f7fe;
+    --white: #ffffff;
+    --text-dark: #333;
+    --text-muted: #666;
+    --border-color: #e0e6ed;
+    --shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1250px;
+    margin: auto;
+}
+
+/* Navigation */
+.top-nav {
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    padding: 10px 22px;
+    border-radius: 30px;
+    color: var(--primary-blue);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.back-btn:hover {
+    background: var(--primary-blue);
+    color: var(--white);
+    transform: translateX(-5px);
+}
+
+/* Profile Card Header */
+.profile-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 25px 35px;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    margin-bottom: 25px;
+    border-left: 6px solid var(--primary-blue);
+}
+
+.student-info h1 {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    color: var(--primary-blue);
+    letter-spacing: -0.5px;
+}
+
+.student-info p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+/* Stats Container (The Two Boxes) */
+.stats-container {
+    display: flex;
+    gap: 15px;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 12px;
+    min-width: 140px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+}
+
+.sgpa-box {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    box-shadow: 0 6px 12px rgba(40, 53, 147, 0.25);
+}
+
+.cgpa-box {
+    background-color: #f8faff;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+}
+
+.stat-box .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    opacity: 0.9;
+}
+
+.stat-box .score {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+/* Dashboard Grid Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 25px;
+}
+
+/* Common Section Styles */
+.marks-section,
+.chart-container,
+.top-subjects {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+}
+
+/* Honors Section Specific Styling */
+.honors-section {
+    border-top: 5px solid var(--honors-purple);
+    margin-top: 30px;
+}
+
+.honors-section h3 {
+    color: var(--honors-purple) !important;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--primary-blue);
+}
+
+/* Sem Selector Buttons */
+.sem-selector {
+    background: #eee;
+    padding: 4px;
+    border-radius: 8px;
+    display: flex;
+    gap: 2px;
+}
+
+.sem-selector button {
+    padding: 6px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.sem-selector button.active {
+    background: var(--white);
+    color: var(--primary-blue);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Marks Table */
+.marks-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.marks-table th {
+    text-align: left;
+    padding: 15px;
+    background: #f8f9fa;
+    color: var(--primary-blue);
+    font-weight: 700;
+    border-bottom: 2px solid var(--bg-light);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+/* Update header color for honors table */
+.honors-table th {
+    color: var(--honors-purple);
+    background: #fbf5ff;
+}
+
+.marks-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.95rem;
+}
+
+.marks-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Grade Point Badge */
+.gp-badge {
+    background: #e8eaf6;
+    color: var(--primary-blue);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    margin-right: 10px;
+}
+
+/* Sidebar Analytics */
+.analytics-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.chart-container h3, .top-subjects h3 {
+    margin-top: 0;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--primary-blue);
+}
+
+/* Top Subjects List */
+.top-subjects ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-subjects li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.top-subjects li span {
+    font-weight: 500;
+    font-size: 0.9rem;
+    max-width: 70%;
+}
+
+.top-subjects li strong {
+    color: var(--primary-blue);
+    background: #f0f2ff;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Responsive Fixes */
+@media (max-width: 992px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 20px;
+    }
+}
