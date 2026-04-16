@@ -51,11 +51,13 @@ public class GetStudentAnalysisServlet extends HttpServlet {
 
             // 2. Fetch Selected Semester SGPA (Excluding Honors)
             // Ensure this query accurately reflects your college's weighted average
-String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as sgpa " +
-                   "FROM semester_marks sm " +
-                   "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                   "WHERE sm.roll_no = ? AND sm.semester = ? " +
-                   "AND sub.is_honors = FALSE AND sm.credits > 0";
+            String sgpaQuery = "SELECT " +
+                               "  SUM(sm.grade_point * sub.credits) / SUM(sub.credits) as sgpa " +
+                               "FROM semester_marks sm " +
+                               "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
+                               "WHERE sm.roll_no = ? " +
+                               "  AND sm.semester = ? " +
+                               "  AND sub.is_honors = 0";
             PreparedStatement pstSgpa = con.prepareStatement(sgpaQuery);
             pstSgpa.setString(1, rollStr);
             pstSgpa.setString(2, selectedSem);
@@ -64,21 +66,35 @@ String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as
             if (rsSgpa.next()) semesterSGPA = rsSgpa.getDouble("sgpa");
 
             // 3. Fetch Overall CGPA (Excluding Honors - Weighted)
-            String cgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as cgpa " +
+// 3. Fetch Overall CGPA using credits from semester_marks table directly
+            String cgpaQuery = "SELECT " +
+                               "  SUM(sm.grade_point * sm.credits) as total_points, " +
+                               "  SUM(sm.credits) as total_credits " +
                                "FROM semester_marks sm " +
                                "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                               "WHERE sm.roll_no = ? AND sm.credits > 0 AND sub.is_honors = FALSE";
+                               "WHERE sm.roll_no = ? " +
+                               "  AND sub.is_honors = 0 " +
+                               "  AND sm.credits > 0";
+
             PreparedStatement pstCgpa = con.prepareStatement(cgpaQuery);
             pstCgpa.setString(1, rollStr);
             ResultSet rsCgpa = pstCgpa.executeQuery();
+
             double cumulativeCGPA = 0.0;
-            if (rsCgpa.next()) cumulativeCGPA = rsCgpa.getDouble("cgpa");
+            if (rsCgpa.next()) {
+                double totalPoints = rsCgpa.getDouble("total_points");
+                double totalCredits = rsCgpa.getDouble("total_credits");
+                if (totalCredits > 0) {
+                    cumulativeCGPA = totalPoints / totalCredits;
+                }
+            }     
 
             // 4. Fetch Trend Data for Chart (Excluding Honors)
+            // 4. Fetch Trend Data for Chart
             String trendQuery = "SELECT sm.semester, SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as avg_gp " +
                                 "FROM semester_marks sm " +
                                 "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                                "WHERE sm.roll_no = ? AND sm.credits > 0 AND sub.is_honors = FALSE " +
+                                "WHERE sm.roll_no = ? AND sm.credits > 0 AND sub.is_honors = 0 " +
                                 "GROUP BY sm.semester ORDER BY sm.semester ASC";
             PreparedStatement pstTrend = con.prepareStatement(trendQuery);
             pstTrend.setString(1, rollStr);

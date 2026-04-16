@@ -163,17 +163,27 @@ function loadSemesterDashboard() {
 }
 
 function saveSemesterMarks() {
-    const activeSem = document.querySelector('#semGroup .active').innerText.replace("Semester ", "");
-    let marksData = { semester: activeSem, marks: [] };
+    const activeSem = document.querySelector('#semGroup .active').innerText.replace("Semester ", "").trim();
+    const newSubHeaders = document.querySelectorAll('th[data-new-code]');
+    let newSubjectsList = [];
+    newSubHeaders.forEach(th => {
+        newSubjectsList.push({
+            code: th.getAttribute('data-new-code'),
+            name: th.getAttribute('data-new-name')
+        });
+    });
+
+    let marksData = { semester: activeSem, newSubjects: newSubjectsList, marks: [] };
 
     document.querySelectorAll('.mark-input').forEach(input => {
-        const type = input.getAttribute('data-type');
+        const type = input.getAttribute('data-type').trim();
+        // Do not send the "Total" row to the Servlet
         if (type !== "Total") {
             marksData.marks.push({ 
                 roll: input.getAttribute('data-roll'), 
                 sub: input.getAttribute('data-sub'), 
                 type: type, 
-                val: input.value
+                val: input.value 
             });
         }
     });
@@ -187,7 +197,7 @@ function saveSemesterMarks() {
     .then(msg => {
         alert(msg);
         isEditMode = false;
-        loadSemesterDashboard();
+        loadSemesterDashboard(); // Reload to reflect changes
     });
 }
 

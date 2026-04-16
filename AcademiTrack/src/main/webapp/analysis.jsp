@@ -164,25 +164,53 @@ function loadAnalysis(roll, sem) {
         .catch(err => console.error("Fetch error:", err));
 }
 
-function updateChart(gpaData) {
+function updateChart(trendData) {
     const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // Create an array of 4 nulls, then fill in what we have from the Servlet
+    // This ensures Sem 3 data doesn't accidentally show up in the Sem 2 slot
+    let chartData = [null, null, null, null];
+    
+    // If your trendData from servlet is just an array of values [9.8, 9.7, 9.85]
+    // we map them to the correct index.
+    trendData.forEach((val, index) => {
+        chartData[index] = val;
+    });
+
     if (myChart) myChart.destroy();
+    
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
             datasets: [{
                 label: 'SGPA',
-                data: gpaData,
+                data: chartData,
                 borderColor: '#283593',
-                tension: 0.4,
+                backgroundColor: 'rgba(40, 53, 147, 0.1)',
+                borderWidth: 3,
+                pointBackgroundColor: '#283593',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                tension: 0.3, // Adds a smooth curve
                 fill: true,
-                backgroundColor: 'rgba(40, 53, 147, 0.1)'
+                spanGaps: true // Connects the line even if a middle semester is missing
             }]
         },
-        options: { 
+        options: {
             responsive: true,
-            scales: { y: { min: 0, max: 10 } } 
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0,
+                    max: 10,
+                    ticks: { stepSize: 1 }
+                }
+            },
+            plugins: {
+                legend: { display: false } // Cleans up the UI
+            }
         }
     });
 }
