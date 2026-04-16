@@ -13,25 +13,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creative Dashboard</title>
-
-<link rel="stylesheet" href="dashboardstyle.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcademiTrack - Dashboard</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
 </head>
-
 <body>
 
 <div class="sidebar">
     <div class="sidebar-top">
         <div class="logo">🎓 AcademiTrack</div>
         <div class="menu">
-            <button>📘 Semester</button>
-            <button>📊 Statistics</button>
+            <button class="active" onclick="location.href='dashboard.jsp'">📘 Semester</button>
+            <button onclick="location.href='statistics.jsp'">📊 Statistics</button>
         </div>
     </div>
-
     <button class="logout" onclick="location.href='LogoutServlet'">Logout</button>
 </div>
 
@@ -43,31 +39,34 @@
     <h1>Semester - IT Marks</h1>
 
     <div class="class-buttons">
-        <button onclick="loadStudents('FE1')" data-code="FE1">FE Comp 1</button>
-        <button onclick="loadStudents('FE2')" data-code="FE2">FE Comp 2</button>
-        <button onclick="loadStudents('SE1')" data-code="SE1">SE Comp 1</button>
-        <button onclick="loadStudents('SE2')" data-code="SE2">SE Comp 2</button>
-        <button onclick="loadStudents('TE1')" data-code="TE1">TE Comp 1</button>
-        <button onclick="loadStudents('TE2')" data-code="TE2">TE Comp 2</button>
-        <button onclick="loadStudents('BE1')" data-code="BE1">BE Comp 1</button>
-        <button onclick="loadStudents('BE2')" data-code="BE2">BE Comp 2</button>
+        <button onclick="loadStudents('FE1')">FE Comp 1</button>
+        <button onclick="loadStudents('FE2')">FE Comp 2</button>
+        <button onclick="loadStudents('SE1')">SE Comp 1</button>
+        <button onclick="loadStudents('SE2')">SE Comp 2</button>
+        <button onclick="loadStudents('TE1')">TE Comp 1</button>
+        <button onclick="loadStudents('TE2')">TE Comp 2</button>
+        <button onclick="loadStudents('BE1')">BE Comp 1</button>
+        <button onclick="loadStudents('BE2')">BE Comp 2</button>
     </div>
 
     <div class="controls" style="margin-bottom: 20px;">
-        <button class="view" onclick="addStudent()" style="background: #27ae60;">+ Add New Student</button>
+        <button class="view" onclick="addStudent()" style="background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+            + Add New Student
+        </button>
     </div>
 
-    <div class="search">
-        <input type="text" id="search" placeholder="🔍 Search by name or roll no" onkeyup="filterStudents()">
+    <div class="search" style="margin-bottom: 30px;">
+        <input type="text" id="search" placeholder="🔍 Search by name or roll no" onkeyup="filterStudents()" 
+               style="width: 100%; max-width: 400px; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd; outline: none;">
     </div>
 
-    <div class="podium" style="margin: 20px 0; display: flex; justify-content: center; gap: 20px;">
+    <div class="podium">
         <div class="rank second">🥈 2nd<br>-</div>
         <div class="rank first">🥇 1st<br>-</div>
         <div class="rank third">🥉 3rd<br>-</div>
     </div>
 
-    <div class="actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <div class="actions" style="margin: 30px 0; display: flex; gap: 15px;">
         <a href="view_isa_marks.jsp" class="action-btn">View ISA Marks</a>
         <a href="view_semester_marks.jsp" class="action-btn">View Semester Marks</a>
     </div>
@@ -80,10 +79,13 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <tbody id="studentTable"></tbody>
+        <tbody id="studentTable">
+            </tbody>
     </table>
 </div>
+
 <script>
+// Your script remains the same here...
 let currentList = [];
 
 function loadStudents(cls) {

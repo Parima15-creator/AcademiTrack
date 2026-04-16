@@ -1,8 +1,9 @@
 /* GLOBAL STYLES */
+/* GLOBAL STYLES */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
+    /* REMOVE display: flex; */
     background: linear-gradient(135deg, #1f356d, #2c4aa5);
     min-height: 100vh;
 }
@@ -91,8 +92,8 @@ body {
 
 /* MAIN CONTENT AREA */
 .main {
-    flex: 1;
-    margin-left: 250px;
+    /* flex: 1;  <-- Remove this */
+    margin-left: 250px; /* This now correctly aligns with the 250px sidebar */
     padding: 40px;
     background: #f5f7ff;
     border-top-left-radius: 40px;
