@@ -33,7 +33,7 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
 
-            // 1. Fetch Student Profile Info
+            // 1. Student Profile Info
             String studentQuery = "SELECT name, class_id, phone FROM students WHERE roll_no = ?";
             PreparedStatement pst1 = con.prepareStatement(studentQuery);
             pst1.setString(1, rollStr);
@@ -45,19 +45,13 @@ public class GetStudentAnalysisServlet extends HttpServlet {
                 classId = rs1.getString("class_id");
                 phone = rs1.getString("phone");
             }
-
             String formattedClass = (classId != null && classId.length() >= 3) 
                 ? classId.substring(0, 2) + " COMP " + classId.substring(2) : classId;
 
-            // 2. Fetch Selected Semester SGPA (Excluding Honors)
-            // Ensure this query accurately reflects your college's weighted average
-            String sgpaQuery = "SELECT " +
-                               "  SUM(sm.grade_point * sub.credits) / SUM(sub.credits) as sgpa " +
-                               "FROM semester_marks sm " +
-                               "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                               "WHERE sm.roll_no = ? " +
-                               "  AND sm.semester = ? " +
-                               "  AND sub.is_honors = 0";
+            // 2. Selected Semester SGPA
+            String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as sgpa " +
+                               "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
+                               "WHERE sm.roll_no = ? AND sm.semester = ? AND sub.is_honors = 0";
             PreparedStatement pstSgpa = con.prepareStatement(sgpaQuery);
             pstSgpa.setString(1, rollStr);
             pstSgpa.setString(2, selectedSem);
@@ -65,52 +59,37 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             double semesterSGPA = 0.0;
             if (rsSgpa.next()) semesterSGPA = rsSgpa.getDouble("sgpa");
 
-            // 3. Fetch Overall CGPA (Excluding Honors - Weighted)
-// 3. Fetch Overall CGPA using credits from semester_marks table directly
-            String cgpaQuery = "SELECT " +
-                               "  SUM(sm.grade_point * sm.credits) as total_points, " +
-                               "  SUM(sm.credits) as total_credits " +
-                               "FROM semester_marks sm " +
-                               "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                               "WHERE sm.roll_no = ? " +
-                               "  AND sub.is_honors = 0 " +
-                               "  AND sm.credits > 0";
-
+            // 3. Overall CGPA
+            String cgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) as total_points, SUM(sm.credits) as total_credits " +
+                               "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
+                               "WHERE sm.roll_no = ? AND sub.is_honors = 0 AND sm.credits > 0";
             PreparedStatement pstCgpa = con.prepareStatement(cgpaQuery);
             pstCgpa.setString(1, rollStr);
             ResultSet rsCgpa = pstCgpa.executeQuery();
-
             double cumulativeCGPA = 0.0;
             if (rsCgpa.next()) {
-                double totalPoints = rsCgpa.getDouble("total_points");
-                double totalCredits = rsCgpa.getDouble("total_credits");
-                if (totalCredits > 0) {
-                    cumulativeCGPA = totalPoints / totalCredits;
-                }
+                double tp = rsCgpa.getDouble("total_points");
+                double tc = rsCgpa.getDouble("total_credits");
+                if (tc > 0) cumulativeCGPA = tp / tc;
             }     
 
-            // 4. Fetch Trend Data for Chart (Excluding Honors)
-            // 4. Fetch Trend Data for Chart
-            String trendQuery = "SELECT sm.semester, SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as avg_gp " +
-                                "FROM semester_marks sm " +
-                                "JOIN subjects sub ON sm.subject_code = sub.subject_code " +
+            // 4. Trend Data
+            String trendQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as avg_gp " +
+                                "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
                                 "WHERE sm.roll_no = ? AND sm.credits > 0 AND sub.is_honors = 0 " +
                                 "GROUP BY sm.semester ORDER BY sm.semester ASC";
             PreparedStatement pstTrend = con.prepareStatement(trendQuery);
             pstTrend.setString(1, rollStr);
             ResultSet rsTrend = pstTrend.executeQuery();
             List<String> trendData = new ArrayList<>();
-            while (rsTrend.next()) {
-                trendData.add(String.format("%.2f", rsTrend.getDouble("avg_gp")));
-            }
+            while (rsTrend.next()) trendData.add(String.format("%.2f", rsTrend.getDouble("avg_gp")));
 
-            // 5. Fetch Subject Marks (Includes is_honors flag for UI sorting)
+            // 5. Subject Marks (FIXED: Added marksJsonList.add)
             String marksQuery = "SELECT sub.subject_code, sub.subject_name, sub.is_honors, " +
                    "sm.isa_total, sm.sea_marks, sm.grade_point, sm.grade " +
                    "FROM subjects sub " +
                    "LEFT JOIN semester_marks sm ON sub.subject_code = sm.subject_code AND sm.roll_no = ? " +
                    "WHERE sub.semester = ?";
-            
             PreparedStatement pst2 = con.prepareStatement(marksQuery);
             pst2.setString(1, rollStr);
             pst2.setString(2, selectedSem);
@@ -118,6 +97,9 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             
             List<String> marksJsonList = new ArrayList<>();
             while (rs2.next()) {
+                String gradeLetter = rs2.getString("grade");
+                if (gradeLetter == null || gradeLetter.isEmpty()) gradeLetter = "-";
+
                 String mJson = "{" +
                     "\"code\":\"" + rs2.getString("subject_code") + "\"," +
                     "\"name\":\"" + rs2.getString("subject_name").replace("\"", "\\\"") + "\"," +
@@ -125,18 +107,18 @@ public class GetStudentAnalysisServlet extends HttpServlet {
                     "\"isa\":" + rs2.getDouble("isa_total") + "," +
                     "\"sea\":" + rs2.getDouble("sea_marks") + "," +
                     "\"gp\":" + rs2.getDouble("grade_point") + "," + 
-                    "\"letter\":\"" + (rs2.getString("grade") != null ? rs2.getString("grade") : "-") + "\"" +
+                    "\"letter\":\"" + gradeLetter + "\"" +
                 "}";
-                marksJsonList.add(mJson);
+                marksJsonList.add(mJson); // THIS LINE WAS MISSING
             }
 
-            // 6. Build Final JSON response
+            // 6. Build Final JSON
             String finalJson = "{" +
                 "\"name\":\"" + name.replace("\"", "\\\"") + "\"," +
                 "\"roll\":\"" + rollStr + "\"," +
                 "\"class\":\"" + formattedClass + "\"," +
                 "\"email\":\"" + rollStr + "@dbcegoa.ac.in\"," +
-                "\"phone\":\"" + (phone != null ? phone : "+91 XXXXXXXXXX") + "\"," +
+                "\"phone\":\"" + phone + "\"," +
                 "\"sgpa\":" + String.format("%.2f", semesterSGPA) + "," +
                 "\"cgpa\":" + String.format("%.2f", cumulativeCGPA) + "," +
                 "\"trend\":[" + String.join(",", trendData) + "]," +

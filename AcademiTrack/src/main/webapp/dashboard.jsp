@@ -37,7 +37,7 @@
 
 <div class="main">
     <div class="user-welcome">
-        <span>Welcome back, <strong>${facultyName}</strong> 👋</span>
+        <span>Welcome, <strong>${facultyName}</strong> 👋</span>
     </div>
 
     <h1>Semester - IT Marks</h1>

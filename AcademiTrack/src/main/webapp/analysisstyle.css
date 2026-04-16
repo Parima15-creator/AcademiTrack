@@ -134,20 +134,33 @@ body {
 }
 
 /* Dashboard Grid Layout */
+/* Dashboard Grid Layout */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 25px;
+    align-items: start; /* CRITICAL: Prevents sidebar from stretching vertically */
 }
 
 /* Common Section Styles */
+
 .marks-section,
-.chart-container,
 .top-subjects {
     background: var(--white);
     padding: 25px;
     border-radius: 16px;
     box-shadow: var(--shadow);
+}
+
+/* Specific Fix for Chart */
+.chart-container {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    position: relative;
+    height: 250px; /* Lock the height so it doesn't look stretched */
+    width: 100%;
 }
 
 /* Honors Section Specific Styling */
@@ -233,14 +246,33 @@ body {
     border-bottom: none;
 }
 
-/* Grade Point Badge */
+.marks-table th:nth-child(6), 
+.marks-table td:nth-child(6) {
+    width: 120px;
+    text-align: center;
+}
+
+.marks-table th:nth-child(7), 
+.marks-table td:nth-child(7) {
+    width: 80px;
+    text-align: center;
+}
+
 .gp-badge {
     background: #e8eaf6;
     color: var(--primary-blue);
     padding: 4px 10px;
     border-radius: 6px;
     font-weight: 800;
-    margin-right: 10px;
+    display: inline-block;
+    min-width: 35px;
+    text-align: center;
+}
+
+/* Optional: Make the Grade Letter stand out */
+.marks-table td strong {
+    font-size: 1rem;
+    vertical-align: middle;
 }
 
 /* Sidebar Analytics */
