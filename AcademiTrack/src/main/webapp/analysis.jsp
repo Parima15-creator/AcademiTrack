@@ -99,20 +99,26 @@ let myChart;
 const urlParams = new URLSearchParams(window.location.search);
 const rollNo = urlParams.get('roll');
 
+/**
+ * Fetches student data and marks for a specific semester
+ */
 function loadAnalysis(roll, sem) {
     fetch(`GetStudentAnalysisServlet?roll=\${roll}&sem=\${sem}`)
         .then(response => response.json())
         .then(data => {
-            if (data.error) { console.error(data.error); return; }
+            if (data.error) { 
+                console.error(data.error); 
+                return; 
+            }
 
-            // 1. Update Profile Card
+            // 1. Update Profile Card Information
             document.getElementById('disp-name').innerText = data.name;
             document.getElementById('disp-contact').innerHTML = `<strong>Email:</strong> \${data.email} | <strong>Phone:</strong> \${data.phone}`;
             document.getElementById('disp-meta').innerHTML = `<strong>Roll No:</strong> \${data.roll} | <strong>Class:</strong> \${data.class}`;
             document.getElementById('disp-sgpa').innerText = parseFloat(data.sgpa || 0).toFixed(2);
             document.getElementById('disp-cgpa').innerText = parseFloat(data.cgpa || 0).toFixed(2);
 
-            // 2. Prepare Tables
+            // 2. Clear and Prepare Tables
             const regularBody = document.getElementById('studentMarksBody');
             const honorsBody = document.getElementById('honorsMarksBody');
             const hSection = document.getElementById('honorsSection');
@@ -122,42 +128,40 @@ function loadAnalysis(roll, sem) {
             hSection.style.display = "none";
             let honorsFound = false;
 
-            // 3. Populate Marks
-            // 3. Populate Marks
-data.marks.forEach(m => {
-    const total = (parseFloat(m.isa) || 0) + (parseFloat(m.sea) || 0);
-    const rowHtml = `
-        <tr>
-            <td>\${m.code}</td>
-            <td>\${m.name}</td>
-            <td>\${m.isa}</td>
-            <td>\${m.sea}</td>
-            <td><strong>\${total.toFixed(1)}</strong></td>
-            <td><span class="gp-badge">\${m.gp}</span></td> 
-            <td><strong style="color:var(--primary-blue)">\${m.letter}</strong></td>
-        </tr>`;
-    
-    if (m.is_honors) { 
-        honorsBody.innerHTML += rowHtml; 
-        honorsFound = true; 
-    } else { 
-        regularBody.innerHTML += rowHtml; 
-    }
-});
+            // 3. Populate Marks Rows
+            data.marks.forEach(m => {
+                const total = (parseFloat(m.isa) || 0) + (parseFloat(m.sea) || 0);
+                const rowHtml = `
+                    <tr>
+                        <td>\${m.code}</td>
+                        <td>\${m.name}</td>
+                        <td>\${m.isa}</td>
+                        <td>\${m.sea}</td>
+                        <td><strong>\${total.toFixed(1)}</strong></td>
+                        <td><span class="gp-badge">\${m.gp}</span></td> 
+                        <td><strong style="color:var(--primary-blue)">\${m.letter}</strong></td>
+                    </tr>`;
+                
+                if (m.is_honors) { 
+                    honorsBody.innerHTML += rowHtml; 
+                    honorsFound = true; 
+                } else { 
+                    regularBody.innerHTML += rowHtml; 
+                }
+            });
             if (honorsFound) hSection.style.display = "block";
 
-            // 4. FIX: TOP 5 SUBJECTS LOGIC (Added this back)
+            // 4. Update Top 5 Subjects List
             const topList = document.getElementById('topSubjectsList');
             topList.innerHTML = "";
             
-            // Sort marks by total (ISA + SEA) descending
+            // Sort by total marks descending
             const sortedMarks = [...data.marks].sort((a, b) => {
                 const totalA = (parseFloat(a.isa) || 0) + (parseFloat(a.sea) || 0);
                 const totalB = (parseFloat(b.isa) || 0) + (parseFloat(b.sea) || 0);
                 return totalB - totalA;
             });
 
-            // Take top 5 and display
             sortedMarks.slice(0, 5).forEach(m => {
                 const totalMarks = (parseFloat(m.isa) || 0) + (parseFloat(m.sea) || 0);
                 topList.innerHTML += `
@@ -167,21 +171,26 @@ data.marks.forEach(m => {
                     </li>`;
             });
 
-            // 5. Update Chart
+            // 5. Update Line Chart Trend
             updateChart(data.trend);
         })
         .catch(err => console.error("Fetch error:", err));
 }
 
+/**
+ * Initializes or updates the Chart.js line graph
+ */
 function updateChart(trendData) {
     const canvas = document.getElementById('performanceChart');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     
+    // Prepare 4 slots for 4 semesters
     let chartValues = [null, null, null, null];
     trendData.forEach((val, i) => { if(i < 4) chartValues[i] = val; });
 
     if (myChart) myChart.destroy();
+
     myChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -193,17 +202,37 @@ function updateChart(trendData) {
                 backgroundColor: 'rgba(40, 53, 147, 0.1)',
                 tension: 0.4,
                 fill: true,
+                pointBackgroundColor: '#283593',
                 spanGaps: true
             }]
         },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            scales: { y: { min: 0, max: 10 } } 
+        options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            min: 0,
+            max: 10,
+            beginAtZero: true,
+            afterFit: (scale) => {
+                scale.width = 40; // Gives the labels breathing room
+            },
+            ticks: {
+                stepSize: 1,
+                autoSkip: false, // Prevents Chart.js from "guessing"
+                callback: function(value) {
+                    return value; // Explicitly returns every integer
+                }
+            }
         }
+    }
+}
     });
 }
 
+/**
+ * Event Listeners for Semester Selection
+ */
 document.querySelectorAll('#semSelector button').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('#semSelector button').forEach(b => b.classList.remove('active'));
@@ -212,7 +241,16 @@ document.querySelectorAll('#semSelector button').forEach(btn => {
     });
 });
 
-window.onload = () => { if(rollNo) loadAnalysis(rollNo, "4"); };
+/**
+ * Initial load on page entry
+ */
+window.onload = () => { 
+    if(rollNo) {
+        loadAnalysis(rollNo, "4"); // Defaults to Semester 4
+    } else {
+        alert("No student selected!");
+    }
+};
 </script>
 </body>
 </html>

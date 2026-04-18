@@ -159,10 +159,13 @@ body {
     border-radius: 16px;
     box-shadow: var(--shadow);
     position: relative;
-    height: 250px; /* Lock the height so it doesn't look stretched */
+    height: 350px; /* Lock the height so it doesn't look stretched */
     width: 100%;
 }
-
+.canvas-wrapper {
+    height: 250px; /* Try increasing this if it's smaller */
+    position: relative;
+}
 /* Honors Section Specific Styling */
 .honors-section {
     border-top: 5px solid var(--honors-purple);

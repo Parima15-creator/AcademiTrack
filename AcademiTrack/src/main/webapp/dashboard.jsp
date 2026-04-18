@@ -60,12 +60,6 @@
                style="width: 100%; max-width: 400px; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd; outline: none;">
     </div>
 
-    <div class="podium">
-        <div class="rank second">🥈 2nd<br>-</div>
-        <div class="rank first">🥇 1st<br>-</div>
-        <div class="rank third">🥉 3rd<br>-</div>
-    </div>
-
     <div class="actions" style="margin: 30px 0; display: flex; gap: 15px;">
         <a href="view_isa_marks.jsp" class="action-btn">View ISA Marks</a>
         <a href="view_semester_marks.jsp" class="action-btn">View Semester Marks</a>
@@ -165,26 +159,6 @@ function deleteStudent(rollNo) {
             location.reload(); 
         });
     }
-}
-function updatePodium() {
-    const first = document.querySelector(".first");
-    const second = document.querySelector(".second");
-    const third = document.querySelector(".third");
-
-    if (!currentList || currentList.length === 0) {
-        first.innerHTML = "1st<br>-";
-        second.innerHTML = "2nd<br>-";
-        third.innerHTML = "3rd<br>-";
-        return;
-    }
-
-    // This creates a separate sorted version ONLY for the podium
-    // It does not change the order of the main student table
-    const rankedList = [...currentList].sort((a, b) => b.gpa - a.gpa);
-
-    first.innerHTML = `1st<br>${rankedList[0] ? rankedList[0].name : "-"}<br>GPA: ${rankedList[0] ? rankedList[0].gpa : "0.00"}`;
-    second.innerHTML = `2nd<br>${rankedList[1] ? rankedList[1].name : "-"}<br>GPA: ${rankedList[1] ? rankedList[1].gpa : "0.00"}`;
-    third.innerHTML = `3rd<br>${rankedList[2] ? rankedList[2].name : "-"}<br>GPA: ${rankedList[2] ? rankedList[2].gpa : "0.00"}`;
 }
 
 function filterStudents() {

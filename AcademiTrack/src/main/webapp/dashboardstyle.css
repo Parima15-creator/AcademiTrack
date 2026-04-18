@@ -252,31 +252,3 @@ tr:hover { background: #f8faff; }
     box-shadow: 0 6px 15px rgba(31, 53, 109, 0.25);
 }
 
-/* PODIUM SECTION */
-.podium {
-    margin-top: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    gap: 30px;
-}
-
-.rank {
-    width: 130px;
-    border-radius: 20px;
-    font-weight: bold;
-    color: white;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 20px 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    transition: 0.3s ease;
-}
-
-.rank:hover { transform: translateY(-10px); }
-
-.first { height: 180px; background: linear-gradient(135deg, #ffd700, #ffb700); }
-.second { height: 140px; background: linear-gradient(135deg, #c0c0c0, #9e9e9e); }
-.third { height: 110px; background: linear-gradient(135deg, #cd7f32, #a05a2c); }
