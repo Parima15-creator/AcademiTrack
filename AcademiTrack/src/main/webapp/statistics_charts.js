@@ -1,44 +1,79 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
- */
+let currentClass = null;
+let pfChart, compareChart;
 
-let passFailChart, gradeDistChart;
-
-function loadStatistics() {
-    const activeClass = document.querySelector('#classGroup .active').getAttribute('data-code');
-    const activeSem = "4"; // You can make this dynamic like your dashboard
-
-    fetch(`GetStatisticsServlet?class=${activeClass}&sem=${activeSem}`)
-        .then(res => res.json())
-        .then(data => {
-            updatePodium(data.toppers);
-            renderCharts(data);
-        });
+// Function called when a class button is clicked
+function selectClass(btn, cls) {
+    // 1. Update UI: remove active class from all, add to clicked
+    document.querySelectorAll('.class-buttons button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    currentClass = cls;
+    loadStats(); // Trigger fetch
 }
 
-function updatePodium(toppers) {
-    if (toppers && toppers.length > 0) {
-        document.getElementById('topper1').innerText = toppers[0].name;
-        document.getElementById('gpa1').innerText = "GPA: " + toppers[0].gpa;
-        // Repeat for topper 2 and 3...
+// Function called when Semester dropdown changes
+function changeSemester() {
+    if (currentClass) {
+        loadStats();
     }
 }
 
-function renderCharts(data) {
-    // 1. Pass/Fail Pie Chart
-    const ctx1 = document.getElementById('passFailChart').getContext('2d');
-    if(passFailChart) passFailChart.destroy();
-    passFailChart = new Chart(ctx1, {
-        type: 'pie',
+function loadStats() {
+    const sem = document.getElementById('semSelect').value;
+    const sub = document.getElementById('subjectSelect').value || "";
+
+    // Fetch data from Servlet
+    fetch(`GetStatisticsServlet?class=${currentClass}&sem=${sem}&subject=${sub}`)
+        .then(res => res.json())
+        .then(data => {
+            // Update Reattempt Metric
+            document.getElementById('reattemptVal').innerText = data.reattemptSuccess || 0;
+
+            // Render Pass/Fail Donut
+            renderPFChart(data.passCount, data.failCount);
+
+            // Render Class Comparison (e.g., SE1 vs SE2)
+            renderCompareChart(data.comparison);
+
+            // Update Subject Dropdown (if subjects exist for this sem)
+            updateSubjectDropdown(data.subjects);
+            
+            // Update Toppers Table
+            updateToppersTable(data.subjectToppers);
+        })
+        .catch(err => console.error("Error loading stats:", err));
+}
+
+function renderPFChart(pass, fail) {
+    const ctx = document.getElementById('passFailChart').getContext('2d');
+    if (pfChart) pfChart.destroy();
+    pfChart = new Chart(ctx, {
+        type: 'doughnut',
         data: {
-            labels: ['Passed', 'Failed'],
+            labels: ['Pass', 'Fail'],
             datasets: [{
-                data: [data.passCount, data.failCount],
+                data: [pass, fail],
                 backgroundColor: ['#27ae60', '#e74c3c']
             }]
-        }
+        },
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-document.addEventListener('DOMContentLoaded', loadStatistics);
+function renderCompareChart(compData) {
+    const ctx = document.getElementById('compareChart').getContext('2d');
+    if (compareChart) compareChart.destroy();
+    
+    compareChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: compData.map(d => d.class),
+            datasets: [{
+                label: 'Average GPA',
+                data: compData.map(d => d.avgGpa),
+                backgroundColor: '#3498db'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
