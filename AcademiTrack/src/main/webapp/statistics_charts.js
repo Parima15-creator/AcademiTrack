@@ -1,79 +1,133 @@
-let currentClass = null;
-let pfChart, compareChart;
+let selectedClass = null;
+let selectedSem = null;
+let chartInstances = {};
 
-// Function called when a class button is clicked
+/**
+ * Step 1: Handle Class Selection
+ */
 function selectClass(btn, cls) {
-    // 1. Update UI: remove active class from all, add to clicked
-    document.querySelectorAll('.class-buttons button').forEach(b => b.classList.remove('active'));
+    // UI Update: Highlight active button
+    document.querySelectorAll('#classGroup button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     
-    currentClass = cls;
-    loadStats(); // Trigger fetch
+    selectedClass = cls;
+    
+    // Show Semester section and hide previous stats
+    document.getElementById('semSection').style.display = 'block';
+    document.getElementById('statsContent').style.display = 'none';
+    
+    // Reset semester selection
+    selectedSem = null;
+    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
 }
 
-// Function called when Semester dropdown changes
-function changeSemester() {
-    if (currentClass) {
-        loadStats();
-    }
+/**
+ * Step 2: Handle Semester Selection
+ */
+function selectSemester(btn, sem) {
+    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    selectedSem = sem;
+    
+    // Reveal the stats dashboard
+    document.getElementById('statsContent').style.display = 'block';
+    
+    // Reset dropdown and table for new context
+    document.getElementById('subjectSelect').innerHTML = '<option value="">-- View Toppers for Subject --</option>';
+    document.getElementById('topperBody').innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
+    
+    loadStats();
 }
 
+/**
+ * Step 3: Fetch and Render Data
+ */
 function loadStats() {
-    const sem = document.getElementById('semSelect').value;
-    const sub = document.getElementById('subjectSelect').value || "";
+    if (!selectedClass || !selectedSem) return;
 
-    // Fetch data from Servlet
-    fetch(`GetStatisticsServlet?class=${currentClass}&sem=${sem}&subject=${sub}`)
+    const sub = document.getElementById('subjectSelect').value;
+
+    // Fetching data from the Servlet
+    fetch(`GetStatisticsServlet?class=${selectedClass}&sem=${selectedSem}&subject=${sub}`)
         .then(res => res.json())
         .then(data => {
-            // Update Reattempt Metric
-            document.getElementById('reattemptVal').innerText = data.reattemptSuccess || 0;
+            console.log("Dashboard Data Received:", data);
 
-            // Render Pass/Fail Donut
-            renderPFChart(data.passCount, data.failCount);
+            // 1. Update Numeric Metrics
+            document.getElementById('passMetric').innerText = data.passCount || 0;
+            document.getElementById('failMetric').innerText = data.failCount || 0;
+            document.getElementById('reattemptCount').innerText = data.reattemptSuccess || 0;
 
-            // Render Class Comparison (e.g., SE1 vs SE2)
-            renderCompareChart(data.comparison);
+            // 2. Populate Subject Dropdown (if empty)
+            // --- 2. POPULATE SUBJECT DROPDOWN ---
+            const subDropdown = document.getElementById('subjectSelect');
 
-            // Update Subject Dropdown (if subjects exist for this sem)
-            updateSubjectDropdown(data.subjects);
+            // Only populate if it's currently empty
+            if (subDropdown.options.length <= 1 && data.subjects) {
+                data.subjects.forEach(s => {
+                    // Display format: "CMP 202 - Data Structures"
+                    let displayText = `${s.code} - ${s.name}`;
+                    let opt = new Option(displayText, s.code);
+
+                    // CSS Fix: Ensure text is dark and visible
+                    opt.style.color = "#2c4aa5"; 
+                    opt.style.background = "white";
+
+                    subDropdown.add(opt);
+                });
+            }
+            // 3. Render Pass/Fail Doughnut Chart
+            renderChart('pfChart', 'doughnut', ['Passed', 'Failed'], 
+                        [data.passCount, data.failCount], ['#27ae60', '#e74c3c']);
             
-            // Update Toppers Table
-            updateToppersTable(data.subjectToppers);
+            // 4. Render GPA Comparison Bar Chart
+            const compLabels = data.comparison ? data.comparison.map(c => c.class) : [];
+            const compGPAs = data.comparison ? data.comparison.map(c => c.avgGpa) : [];
+            renderChart('compareChart', 'bar', compLabels, compGPAs, '#4e73df');
+
+            // 5. Update Toppers Table
+            const tBody = document.getElementById('topperBody');
+            tBody.innerHTML = ""; 
+            
+            if (data.subjectToppers && data.subjectToppers.length > 0) {
+                data.subjectToppers.forEach((t, i) => {
+                    tBody.innerHTML += `
+                        <tr>
+                            <td><strong>#${i + 1}</strong></td>
+                            <td>${t.name}</td>
+                            <td><span class="score-badge">${t.score.toFixed(1)}</span></td>
+                        </tr>`;
+                });
+            } else {
+                tBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
+            }
         })
-        .catch(err => console.error("Error loading stats:", err));
+        .catch(err => console.error("Fetch Error:", err));
 }
 
-function renderPFChart(pass, fail) {
-    const ctx = document.getElementById('passFailChart').getContext('2d');
-    if (pfChart) pfChart.destroy();
-    pfChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Pass', 'Fail'],
-            datasets: [{
-                data: [pass, fail],
-                backgroundColor: ['#27ae60', '#e74c3c']
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-}
-
-function renderCompareChart(compData) {
-    const ctx = document.getElementById('compareChart').getContext('2d');
-    if (compareChart) compareChart.destroy();
+/**
+ * Helper: Chart.js Wrapper
+ */
+function renderChart(id, type, labels, data, colors) {
+    // Prevent overlapping charts by destroying old instance
+    if (chartInstances[id]) chartInstances[id].destroy();
     
-    compareChart = new Chart(ctx, {
-        type: 'bar',
+    const ctx = document.getElementById(id).getContext('2d');
+    chartInstances[id] = new Chart(ctx, {
+        type: type,
         data: {
-            labels: compData.map(d => d.class),
+            labels: labels,
             datasets: [{
-                label: 'Average GPA',
-                data: compData.map(d => d.avgGpa),
-                backgroundColor: '#3498db'
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 1
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+        }
     });
 }

@@ -60,97 +60,76 @@
                 <option value="">-- View Toppers for Subject --</option>
             </select>
         </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Pass vs. Fail Ratio</h3>
-                <div class="chart-container"><canvas id="pfChart"></canvas></div>
+                <div class="stats-grid">
+                    <div class="stat-card" style="text-align: center;">
+                <h3>Passed Students</h3>
+                <div class="metric-value" id="passMetric">0</div>
+                <p>Cleared all non-honours subjects</p>
             </div>
+
+            <!-- Block 2: Failed Students -->
+            <div class="stat-card" styl e="text-align: center;">
+                <h3>Failed Students</h3>
+                <div class="metric-value" id="failMetric" style="color: #e74c3c;">0</div>
+                <p>At least one 'F' in regular subjects</p>
+            </div>
+
+            <!-- Block 3: Reattempt Recovery (Existing) -->
             <div class="stat-card" style="text-align: center;">
                 <h3>Reattempt Recovery</h3>
                 <div class="metric-value" id="reattemptCount">0</div>
                 <p>Students cleared on reattempt</p>
             </div>
+
+            <div class="stat-card">
+
+                <h3>Pass vs. Fail Ratio</h3>
+
+                <div class="chart-container"><canvas id="pfChart"></canvas></div>
+
+            </div>
+
+            <div class="stat-card" style="text-align: center;">
+
+                <h3>Reattempt Recovery</h3>
+
+                <div class="metric-value" id="reattemptCount">0</div>
+
+                <p>Students cleared on reattempt</p>
+
+            </div>
+
             <div class="stat-card full-width">
+
                 <h3>Class Comparison (Average GPA)</h3>
+
                 <div class="chart-container"><canvas id="compareChart"></canvas></div>
+
             </div>
+
             <div class="stat-card full-width">
+
                 <h3>Subject Toppers (Top 5)</h3>
+
                 <table class="topper-table">
+
                     <thead><tr><th>Rank</th><th>Name</th><th>Total Marks</th></tr></thead>
+
                     <tbody id="topperBody"></tbody>
+
                 </table>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
-<script>
-let selectedClass = null, selectedSem = null, chartInstances = {};
+    <script src="statistics_charts.js"></script>
+    
 
-function selectClass(btn, cls) {
-    document.querySelectorAll('#classGroup button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedClass = cls;
-    document.getElementById('semSection').style.display = 'block';
-    document.getElementById('statsContent').style.display = 'none';
-}
 
-function selectSemester(btn, sem) {
-    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedSem = sem;
-    document.getElementById('statsContent').style.display = 'block';
-    document.getElementById('subjectSelect').innerHTML = '<option value="">-- View Toppers for Subject --</option>';
-    loadStats();
-}
-
-function loadStats() {
-    if (!selectedClass || !selectedSem) return;
-    const sub = document.getElementById('subjectSelect').value;
-
-    fetch(`GetStatisticsServlet?class=${selectedClass}&sem=${selectedSem}&subject=${sub}`)
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById('reattemptCount').innerText = data.reattemptSuccess || 0;
-
-            const subDropdown = document.getElementById('subjectSelect');
-            if (subDropdown.options.length <= 1 && data.subjects) {
-                data.subjects.forEach(s => subDropdown.add(new Option(s, s)));
-            }
-
-            renderChart('pfChart', 'doughnut', ['Passed', 'Failed'], [data.passCount, data.failCount], ['#27ae60', '#e74c3c']);
-            
-            const compLabels = data.comparison ? data.comparison.map(c => c.class) : [];
-            const compGPAs = data.comparison ? data.comparison.map(c => c.avgGpa) : [];
-            renderChart('compareChart', 'bar', compLabels, compGPAs, '#4e73df');
-
-            const tBody = document.getElementById('topperBody');
-            tBody.innerHTML = "";
-            if (data.subjectToppers && data.subjectToppers.length > 0) {
-                data.subjectToppers.forEach((t, i) => {
-                    tBody.innerHTML += `<tr><td>#${i+1}</td><td>${t.name}</td><td><span class="score-badge">${t.score.toFixed(1)}</span></td></tr>`;
-                });
-            } else {
-                tBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
-            }
-        });
-}
-
-function renderChart(id, type, labels, data, colors) {
-    if (chartInstances[id]) chartInstances[id].destroy();
-    const ctx = document.getElementById(id).getContext('2d');
-    chartInstances[id] = new Chart(ctx, {
-        type: type,
-        data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            scales: type === 'bar' ? { y: { beginAtZero: true, max: 10, ticks: { stepSize: 1 } } } : {}
-        }
-    });
-}
-</script>
 </body>
 </html>
