@@ -21,10 +21,6 @@
         <servlet-class>com.mycompany.academicperformancetracker.UpdateMarksServlet</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>DeleteSubjectServlet</servlet-name>
-        <servlet-class>com.mycompany.academicperformancetracker.DeleteSubjectServlet</servlet-class>
-    </servlet>
-    <servlet>
         <servlet-name>AddStudentServlet</servlet-name>
         <servlet-class>com.mycompany.academicperformancetracker.AddStudentServlet</servlet-class>
     </servlet>
@@ -66,10 +62,6 @@
         <url-pattern>/UpdateMarksServlet</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>DeleteSubjectServlet</servlet-name>
-        <url-pattern>/DeleteSubjectServlet</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
         <servlet-name>AddStudentServlet</servlet-name>
         <url-pattern>/AddStudentServlet</url-pattern>
     </servlet-mapping>
@@ -94,6 +86,6 @@
         <url-pattern>/faces/*</url-pattern>
     </servlet-mapping>
     <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-</welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
 </web-app>

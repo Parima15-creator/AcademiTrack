@@ -1,28 +1,23 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
-    if (session.getAttribute("facultyName") == null) {
-        response.sendRedirect("index.html");
-    }
-%>
+<% if (session.getAttribute("facultyName") == null) { response.sendRedirect("index.html"); } %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AcademiTrack | Performance Analytics</title>
     <link rel="stylesheet" href="dashboardstyle.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Specific Analytics Overrides */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; margin-top: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; margin-top: 20px; }
         .stat-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .full-width { grid-column: 1 / -1; }
         .chart-container { position: relative; height: 300px; width: 100%; }
-        .filter-row { display: flex; gap: 20px; margin-bottom: 25px; align-items: center; }
-        .custom-select { padding: 10px 20px; border-radius: 12px; border: 1px solid #ddd; outline: none; background: white; color: #1f356d; font-weight: 500; }
-        .metric-value { font-size: 3rem; font-weight: 800; color: #2c4aa5; margin: 10px 0; }
-        .topper-table th { background: #4e73df; }
+        .metric-value { font-size: 4rem; font-weight: 800; color: #2c4aa5; margin: 20px 0; }
+        .score-badge { background: #eef2ff; color: #2c4aa5; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        .topper-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .topper-table th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #666; }
+        .topper-table td { padding: 15px 12px; border-bottom: 1px solid #f9f9f9; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -38,18 +33,16 @@
 </div>
 
 <div class="main">
-    <div class="user-welcome">
-        <span>Welcome, <strong>${facultyName}</strong> 👋</span>
-    </div>
-
+    <div class="user-welcome"><span>Welcome, <strong>${facultyName}</strong> 👋</span></div>
     <h1>Performance Analytics</h1>
 
+    <!-- Selection Steps -->
     <div class="class-buttons" id="classGroup">
         <button onclick="selectClass(this, 'FE1')">FE Comp 1</button>
         <button onclick="selectClass(this, 'FE2')">FE Comp 2</button>
         <button onclick="selectClass(this, 'SE1')">SE Comp 1</button>
         <button onclick="selectClass(this, 'SE2')">SE Comp 2</button>
-        </div>
+    </div>
 
     <div id="semSection" style="display: none; margin-top: 20px;">
         <h3>Select Semester</h3>
@@ -62,9 +55,9 @@
     </div>
 
     <div id="statsContent" style="display: none; margin-top: 30px;">
-        <div class="filter-row">
-            <select id="subjectSelect" class="custom-select" onchange="loadStats()">
-                <option value="">View Toppers for Subject</option>
+        <div style="margin-bottom: 20px;">
+            <select id="subjectSelect" class="action-btn" style="background: white; color: #2c4aa5; padding: 10px; border-radius: 8px;" onchange="loadStats()">
+                <option value="">-- View Toppers for Subject --</option>
             </select>
         </div>
 
@@ -73,23 +66,19 @@
                 <h3>Pass vs. Fail Ratio</h3>
                 <div class="chart-container"><canvas id="pfChart"></canvas></div>
             </div>
-
             <div class="stat-card" style="text-align: center;">
                 <h3>Reattempt Recovery</h3>
                 <div class="metric-value" id="reattemptCount">0</div>
                 <p>Students cleared on reattempt</p>
             </div>
-
             <div class="stat-card full-width">
-                <h3>Class Comparison: COMP 1 vs. COMP 2</h3>
+                <h3>Class Comparison (Average GPA)</h3>
                 <div class="chart-container"><canvas id="compareChart"></canvas></div>
             </div>
-            
             <div class="stat-card full-width">
+                <h3>Subject Toppers (Top 5)</h3>
                 <table class="topper-table">
-                    <thead>
-                        <tr><th>Rank</th><th>Name</th><th>Marks</th></tr>
-                    </thead>
+                    <thead><tr><th>Rank</th><th>Name</th><th>Total Marks</th></tr></thead>
                     <tbody id="topperBody"></tbody>
                 </table>
             </div>
@@ -98,87 +87,70 @@
 </div>
 
 <script>
-let selectedClass = null;
-let selectedSem = null;
-let charts = {};
+let selectedClass = null, selectedSem = null, chartInstances = {};
 
 function selectClass(btn, cls) {
-    // UI Update
     document.querySelectorAll('#classGroup button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
     selectedClass = cls;
-    
-    // Reveal Semester Section
     document.getElementById('semSection').style.display = 'block';
-    
-    // Reset selections below if class changes
-    selectedSem = null;
-    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
     document.getElementById('statsContent').style.display = 'none';
 }
 
 function selectSemester(btn, sem) {
-    // UI Update
     document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
     selectedSem = sem;
-    
-    // Reveal Stats and Load Data
     document.getElementById('statsContent').style.display = 'block';
+    document.getElementById('subjectSelect').innerHTML = '<option value="">-- View Toppers for Subject --</option>';
     loadStats();
 }
 
 function loadStats() {
     if (!selectedClass || !selectedSem) return;
-
     const sub = document.getElementById('subjectSelect').value;
 
     fetch(`GetStatisticsServlet?class=${selectedClass}&sem=${selectedSem}&subject=${sub}`)
         .then(res => res.json())
         .then(data => {
-            // FIX: Check if data exists before setting to avoid "undefined"
             document.getElementById('reattemptCount').innerText = data.reattemptSuccess || 0;
 
-            // Update Subject Dropdown
             const subDropdown = document.getElementById('subjectSelect');
             if (subDropdown.options.length <= 1 && data.subjects) {
                 data.subjects.forEach(s => subDropdown.add(new Option(s, s)));
             }
 
-            // Render Charts and Tables
-            renderPFChart(data.passCount || 0, data.failCount || 0);
-            renderCompareChart(data.comparison || []);
-            updateTopperTable(data.subjectToppers || []);
-        })
-        .catch(err => console.error("Data Fetch Error:", err));
-}
+            renderChart('pfChart', 'doughnut', ['Passed', 'Failed'], [data.passCount, data.failCount], ['#27ae60', '#e74c3c']);
+            
+            const compLabels = data.comparison ? data.comparison.map(c => c.class) : [];
+            const compGPAs = data.comparison ? data.comparison.map(c => c.avgGpa) : [];
+            renderChart('compareChart', 'bar', compLabels, compGPAs, '#4e73df');
 
-// ... (renderPFChart and renderCompareChart functions stay the same)
+            const tBody = document.getElementById('topperBody');
+            tBody.innerHTML = "";
+            if (data.subjectToppers && data.subjectToppers.length > 0) {
+                data.subjectToppers.forEach((t, i) => {
+                    tBody.innerHTML += `<tr><td>#${i+1}</td><td>${t.name}</td><td><span class="score-badge">${t.score.toFixed(1)}</span></td></tr>`;
+                });
+            } else {
+                tBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
+            }
+        });
+}
 
 function renderChart(id, type, labels, data, colors) {
     if (chartInstances[id]) chartInstances[id].destroy();
     const ctx = document.getElementById(id).getContext('2d');
     chartInstances[id] = new Chart(ctx, {
         type: type,
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
+        data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
+        options: { 
+            responsive: true, 
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom' } }
+            scales: type === 'bar' ? { y: { beginAtZero: true, max: 10, ticks: { stepSize: 1 } } } : {}
         }
     });
 }
-
-document.addEventListener('DOMContentLoaded', loadStats);
 </script>
 </body>
 </html>
