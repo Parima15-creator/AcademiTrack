@@ -22,10 +22,12 @@
         <a href="dashboard.jsp" class="back-btn">← Back</a>
         <h2>Semester Results Dashboard</h2>
         <div class="btn-container">
+            <!-- This button switches between View and Edit/Save modes -->
             <button id="toggleEditBtn" class="edit-btn" onclick="toggleEditMode()"> Edit Semester Marks</button>
         </div>
     </div>
-
+    
+    <!-- Navigation for selecting Class (e.g., SE1) and Semester (1-8) -->
     <div class="nav-container">
         <div class="btn-group" id="classGroup">
             <button class="filter-btn" data-code="FE1">FE Comp 1</button>
@@ -60,16 +62,22 @@
             </tr>
         </thead>
         <tbody id="tbody">
+            <!-- Subject headers will be injected here by JavaScript -->
             <tr><td colspan="10" class="loading-overlay">Select class and semester to load data.</td></tr>
         </tbody>
     </table>
 </div>
 
 <script>
+// State variable to track if we are currently editing marks
 let isEditMode = false;
+
+// The 6 categories of data displayed for every student per subject
 const rowTypes = ["ISA", "SEA", "Total", "Credits Earned", "Grade Point", "Grade"];
 
+//Fetches data from the server and builds the table dynamically
 function loadSemesterDashboard() {
+    // 1. Identify which Class and Semester are currently selected
     const activeClassBtn = document.querySelector('#classGroup .active');
     const activeSemBtn = document.querySelector('#semGroup .active');
     if(!activeClassBtn || !activeSemBtn) return;
@@ -79,14 +87,20 @@ function loadSemesterDashboard() {
 
     const tbody = document.querySelector('#tbody');
     const theadRow = document.querySelector('#theadRow');
+    
+    // Show loading state while waiting for the Servlet
     tbody.innerHTML = "<tr><td colspan='10' class='loading-overlay'>Loading...</td></tr>";
 
+    // 2. Fetch JSON data from the SemesterMarksServlet
     fetch('SemesterMarksServlet?class=' + encodeURIComponent(selectedClass) + '&sem=' + encodeURIComponent(selectedSem))
         .then(res => res.json())
         .then(data => {
-            tbody.innerHTML = ""; 
+            tbody.innerHTML = "";  // Clear the loading message
+    
+            // Extract and sort subject codes (e.g., [CS1, CS2, CS3])
             const subjects = Object.keys(data.subjectNames || {}).sort();
             
+            // 3. Rebuild the Table Header based on the subjects returned
             theadRow.innerHTML = '<th>Roll No</th><th>Name</th><th>Result Type</th>';
             subjects.forEach(subCode => { 
                 let fullName = data.subjectNames[subCode] || "";
@@ -98,41 +112,53 @@ function loadSemesterDashboard() {
                         '<span class="sub-name-header">' + fullName + '</span>' +
                     '</th>'; 
             });
-
+            
+            // Handle case where no students exist for the selection
             if (!data.students || Object.keys(data.students).length === 0) {
                 tbody.innerHTML = "<tr><td colspan='10'>No records found.</td></tr>";
                 return;
             }
-
+            
+            // 4. Build the Table Body
             for (let roll in data.students) {
                 let s = data.students[roll];
+                
+                // For every student, create 6 rows (ISA, SEA, Total, etc.)
                 rowTypes.forEach((type, index) => {
                     let tr = document.createElement('tr');
                     tr.className = 'student-row';
+                    
+                    // These attributes help with the search/filter feature
                     tr.setAttribute('data-student-name', s.name.toLowerCase());
                     tr.setAttribute('data-roll', roll);
-
+                    
+                    // If it's the first row of the student's block, add Roll and Name with rowspan=6
                     if (index === 0) {
                         tr.innerHTML += '<td rowspan="6">' + roll + '</td>';
                         tr.innerHTML += '<td rowspan="6">' + s.name + '</td>';
                     }
                     tr.innerHTML += '<td>' + type + '</td>';
                     
+                    // 5. Fill in the marks for each subject in this row
                     subjects.forEach(subCode => {
                         let m = s.subjects[subCode] || { isa:0, sea:0, credits:0, gp:0, grade:'-' };
                         let val = 0;
                         
+                        // Determine which value to show based on the current row type
                         if (type === "ISA") val = m.isa;
                         else if (type === "SEA") val = m.sea;
                         else if (type === "Total") val = (parseFloat(m.isa) || 0) + (parseFloat(m.sea) || 0);
                         else if (type === "Credits Earned") val = m.credits;
                         else if (type === "Grade Point") val = m.gp;
                         else if (type === "Grade") val = m.grade;
-
+                        
+                        // 6. Handle Edit Mode: Replace text with <input> fields
+                        // Note: "Total" is always read-only as it's a sum
                         if (isEditMode && type !== "Total") {
                             let inputType = (type === "Grade") ? "text" : "number";
                             tr.innerHTML += '<td><input type="' + inputType + '" class="mark-input" value="' + val + '" data-roll="' + roll + '" data-sub="' + subCode + '" data-type="' + type + '"></td>';
                         } else {
+                            // Apply styling for non-editable rows
                             let cellClass = (type === "Grade" || type === "Total") ? "row-total" : "";
                             tr.innerHTML += '<td class="' + cellClass + '">' + val + '</td>';
                         }
@@ -143,6 +169,7 @@ function loadSemesterDashboard() {
         });
 }
 
+//Gathers all data from input fields and sends it to the server via AJAX POST
 function saveSemesterMarks() {
     const activeSem = document.querySelector('#semGroup .active').innerText.replace("Semester ", "").trim();
     const newSubHeaders = document.querySelectorAll('th[data-new-code]');
@@ -154,11 +181,13 @@ function saveSemesterMarks() {
         });
     });
 
+    // Prepare the JSON object to send to the backend
     let marksData = { semester: activeSem, newSubjects: newSubjectsList, marks: [] };
-
+    
+    // Find all input fields and extract their values
     document.querySelectorAll('.mark-input').forEach(input => {
         const type = input.getAttribute('data-type').trim();
-        // Do not send the "Total" row to the Servlet
+        // We only save raw data (ISA, SEA, Credits, etc.). We don't save "Total" as the server can recalculate it.
         if (type !== "Total") {
             marksData.marks.push({ 
                 roll: input.getAttribute('data-roll'), 
@@ -169,6 +198,7 @@ function saveSemesterMarks() {
         }
     });
 
+    // Send the data to the UpdateSemesterMarksServlet
     fetch('UpdateSemesterMarksServlet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -176,19 +206,22 @@ function saveSemesterMarks() {
     })
     .then(res => res.text())
     .then(msg => {
-        alert(msg);
-        isEditMode = false;
+        alert(msg); // Display success/error message from server
+        isEditMode = false;  // Exit edit mode
         loadSemesterDashboard(); // Reload to reflect changes
     });
 }
 
+//Toggles the UI state between "View" and "Edit"
 function toggleEditMode() {
     const btn = document.getElementById("toggleEditBtn");
     if (isEditMode) {
+        // If we were in edit mode and button is clicked, it means "Save"
         saveSemesterMarks();
         btn.innerText = "✏️ Edit Semester Marks";
         btn.style.background = "var(--accent-orange)";
     } else {
+        // Enter edit mode
         isEditMode = true;
         btn.innerText = "💾 Save Semester Marks";
         btn.style.background = "var(--success-green)";
@@ -196,6 +229,7 @@ function toggleEditMode() {
     }
 }
 
+//Local search function to filter students by name without a server reques
 function filterTable() {
     let input = document.getElementById("tableSearch").value.toLowerCase();
     document.querySelectorAll(".student-row").forEach(row => {
@@ -203,6 +237,7 @@ function filterTable() {
     });
 }
 
+//Event listeners for Class/Semester buttons
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         this.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -211,6 +246,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     });
 });
 
+// Initial load when the page finishes loading
 document.addEventListener('DOMContentLoaded', loadSemesterDashboard);
 </script>
 </body>

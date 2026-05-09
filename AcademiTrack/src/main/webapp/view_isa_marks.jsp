@@ -1,3 +1,7 @@
+<!-- Frontend (JSP/HTML/JS): Handles the user interface, filtering, and "Best of Two" calculations.
+    Backend (Java Servlets): ISAServlet fetches marks from the database, and UpdateMarksServlet saves them back.
+    Communication: Uses the fetch API to send and receive JSON data without refreshing the page. -->
+
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,6 +63,7 @@
 <script>
 let isEditMode = false;
 
+//Takes best 2 IT marks and calculates average
 function calculateBestTwoAvg(m1, m2, m3) {
     let marks = [
         Math.ceil(parseFloat(m1) || 0), 
@@ -70,11 +75,16 @@ function calculateBestTwoAvg(m1, m2, m3) {
     return Math.ceil(avg);
 }
 
+
+//When a class or semester is selected, this function in invoked
 function loadISADashboard() {
+    
+    //It looks for the buttons currently highlighted (class active).
     const activeClassBtn = document.querySelector('#classGroup .active');
     const activeSemBtn = document.querySelector('#semGroup .active');
     if(!activeClassBtn || !activeSemBtn) return;
-
+    
+    //It cleans the data (e.g., changing "Semester 4" to just "4").
     const selectedClass = activeClassBtn.getAttribute('data-code');
     const selectedSem = activeSemBtn.innerText.replace("Semester ", "");
 
@@ -82,13 +92,19 @@ function loadISADashboard() {
     const theadRow = document.querySelector('#theadRow');
     tbody.innerHTML = "<tr><td colspan='10' class='loading-overlay'>Loading...</td></tr>";
 
+    //fetch used to call the ISAServlet. encodeURIComponent ensures that special characters in the class name don't break the URL.
     fetch('ISAServlet?class=' + encodeURIComponent(selectedClass) + '&sem=' + encodeURIComponent(selectedSem))
         .then(res => res.json())
         .then(data => {
             tbody.innerHTML = ""; 
+    
+            //Instead of a static table
+            //the code waits to see what subjects the server sends (e.g., Maths, Physics).
             const subjects = Object.keys(data.subjectNames || {}).sort();
             
             theadRow.innerHTML = '<th>Roll No</th><th>Name</th><th>Assessment Type</th>';
+            
+            //It loops through the subjects array and adds a new <th> for each one.
             subjects.forEach(subCode => { 
                 let fullName = data.subjectNames[subCode] || "";
                 theadRow.innerHTML += '<th><span>' + subCode + '</span><span class="sub-name-header">' + fullName + '</span></th>'; 
@@ -98,11 +114,16 @@ function loadISADashboard() {
                 tbody.innerHTML = "<tr><td colspan='10'>No records found.</td></tr>";
                 return;
             }
-
+            
+            //For every single student, the code creates 6 distinct table rows (tr).
             for (let roll in data.students) {
                 let s = data.students[roll];
                 let rowTypes = ["ISA 1", "ISA 2", "ISA 3", "AVG", "ASSIGNMENT", "TOTAL"];
                 
+                //Since we don't want to repeat the Roll No and Name 6 times, 
+                //the code checks if (index === 0). 
+                //If it's the first row (ISA 1)
+                //it adds the Roll No and Name with rowspan="6", which stretches those cells downward.
                 rowTypes.forEach((type, index) => {
                     let tr = document.createElement('tr');
                     tr.className = 'student-row';
@@ -115,6 +136,9 @@ function loadISADashboard() {
                     }
                     tr.innerHTML += '<td>' + type + '</td>';
                     
+                    //It checks the type. If the row is "ISA 1"
+                    //it shows the isa1 value. If it is "AVG"
+                    //it calls the calculateBestTwoAvg function.
                     subjects.forEach(subCode => {
                         let m = s.subjects[subCode] || { isa1:0, isa2:0, isa3:0, assignment:0 };
                         let val = 0;
@@ -127,10 +151,13 @@ function loadISADashboard() {
                             let bestAvg = parseFloat(calculateBestTwoAvg(m.isa1, m.isa2, m.isa3));
                             val = (bestAvg + (parseFloat(m.assignment) || 0)).toFixed(1);
                         }
-
+                        
+                        //If Edit Mode is ON: It turns the cell into an <input type="number"> so you can type. 
                         if (isEditMode && type !== "AVG" && type !== "TOTAL") {
                             tr.innerHTML += '<td><input type="number" step="0.5" class="mark-input" value="' + val + '" data-roll="' + roll + '" data-sub="' + subCode + '" data-type="' + type + '"></td>';
-                        } else {
+                        } 
+                        //If Edit Mode is OFF: It just displays the number as plain text.
+                        else {
                             let cellClass = (type === "AVG") ? "row-avg" : (type === "TOTAL" ? "row-total" : "");
                             tr.innerHTML += '<td class="' + cellClass + '">' + val + '</td>';
                         }
@@ -141,6 +168,9 @@ function loadISADashboard() {
         });
 }
 
+//It creates a JSON object.
+//It finds every input box on the screen (class .mark-input).
+//It reads the custom data- attributes to know exactly which student and which subject that specific box belongs to.
 function saveAllMarks() {
     const activeSem = document.querySelector('#semGroup .active').innerText.replace("Semester ", "");
     let marksData = { semester: activeSem, marks: [] };
@@ -154,6 +184,9 @@ function saveAllMarks() {
         });
     });
 
+//Unlike the "GET" request used to load data, this uses POST.
+//It sends the entire list of marks as a JSON string in the "body" of the request.
+//Once finished, it shows an alert, turns off Edit Mode, and reloads the dashboard to show the fresh, calculated totals.
     fetch('UpdateMarksServlet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -167,21 +200,30 @@ function saveAllMarks() {
     });
 }
 
+
+//Button is Orange, text says "Edit Marks", table is plain text.
+///Button is Green, text says "Save All Changes", table is full of input boxes.
 function toggleEditMode() {
     if (isEditMode) {
         saveAllMarks();
         const btn = document.getElementById("toggleEditBtn");
         btn.innerText = "✏️ Edit Marks";
+        // If we were editing, save now
+        // Change button back to "Edit" style
         btn.style.background = "var(--accent-orange)";
     } else {
         isEditMode = true;
         const btn = document.getElementById("toggleEditBtn");
         btn.innerText = "💾 Save All Changes";
+        // Turn on editing
+        // Change button to "Save" style (Green)
         btn.style.background = "var(--success-green)";
         loadISADashboard();
     }
 }
 
+//Instead of searching the database again, this uses CSS for speed:
+//It looks at a hidden attribute (data-student-name) on each row and toggles its visibility.
 function filterTable() {
     let input = document.getElementById("tableSearch").value.toLowerCase();
     document.querySelectorAll(".student-row").forEach(row => {
