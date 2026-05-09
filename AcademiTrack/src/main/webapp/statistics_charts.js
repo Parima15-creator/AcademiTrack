@@ -6,36 +6,38 @@ let chartInstances = {};
  * Step 1: Handle Class Selection
  */
 function selectClass(btn, cls) {
-    // UI Update: Highlight active button
-    document.querySelectorAll('#classGroup button').forEach(b => b.classList.remove('active'));
+    // 1. Remove 'active' class from all buttons in the Class group
+    const classButtons = document.querySelectorAll('#classGroup button');
+    classButtons.forEach(b => b.classList.remove('active'));
+
+    // 2. Add 'active' class to the clicked button
     btn.classList.add('active');
-    
+
+    // 3. Existing logic to show next section
     selectedClass = cls;
-    
-    // Show Semester section and hide previous stats
     document.getElementById('semSection').style.display = 'block';
     document.getElementById('statsContent').style.display = 'none';
-    
-    // Reset semester selection
-    selectedSem = null;
-    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
 }
+
 
 /**
  * Step 2: Handle Semester Selection
  */
 function selectSemester(btn, sem) {
-    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
+    // 1. Remove 'active' class from all buttons in the Semester group
+    const semButtons = document.querySelectorAll('#semGroup button');
+    semButtons.forEach(b => b.classList.remove('active'));
+
+    // 2. Add 'active' class to the clicked button
     btn.classList.add('active');
-    
+
+    // 3. Existing logic to load data
     selectedSem = sem;
-    
-    // Reveal the stats dashboard
     document.getElementById('statsContent').style.display = 'block';
     
-    // Reset dropdown and table for new context
-    document.getElementById('subjectSelect').innerHTML = '<option value="">View Toppers for Subject</option>';
-    document.getElementById('topperBody').innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
+    // Clear dropdown so it repopulates for the new semester
+    const subDropdown = document.getElementById('subjectSelect');
+    subDropdown.innerHTML = '<option value="">Select Subject to View Toppers</option>';
     
     loadStats();
 }

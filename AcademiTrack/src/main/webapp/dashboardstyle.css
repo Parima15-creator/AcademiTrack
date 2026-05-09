@@ -272,3 +272,12 @@ tr:hover { background: #f8faff; }
     color: #1f356d; /* Colors the text inside the list */
     background: white;
 }
+
+/* Style for the button when it is selected */
+.class-buttons button.active {
+    background: #1f356d !important; /* Darker blue to indicate selection */
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(31, 53, 109, 0.4);
+    border: 2px solid #fbc531; /* Optional: adds a gold border like your logo theme */
+}
