@@ -115,12 +115,6 @@
                 <div class="chart-container"><canvas id="pfChart"></canvas></div>
             </div>
             
-            <div class="stat-card" style="text-align: center;">
-                <h3>Reattempt Recovery</h3>
-                <div class="metric-value" id="reattemptCount">0</div>
-                <p>Students cleared on reattempt</p>
-            </div>
-            
             <div class="stat-card full-width">
                 <h3>Class Comparison (Average GPA)</h3>
                 <div class="chart-container"><canvas id="compareChart"></canvas></div>
