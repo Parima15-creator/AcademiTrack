@@ -1,3 +1,8 @@
+//Instead of the frontend having to deal with thousands of student records. 
+//This servlet takes a specific parameter (like class_id) and asks the database only for the relevant students.
+
+//It doesn't just get names; it calculates the Average Grade Point for every student in that class instantly.
+
 package com.mycompany.academicperformancetracker;
 
 import java.io.IOException;
@@ -25,6 +30,7 @@ public class GetStudentsServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
+        // Identify which class we are fetching students for
         String classId = request.getParameter("class");
         List<Student> students = new ArrayList<>();
 
@@ -33,10 +39,10 @@ public class GetStudentsServlet extends HttpServlet {
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
 
-            // 4. IMPROVED QUERY: Calculates GPA and joins with marks automatically
-// Change "ORDER BY gpa DESC" to "ORDER BY s.roll_no ASC"
-// Change the ORDER BY in your query string
-String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa " +
+            // 4. QUERY: Calculates GPA and joins with marks automatically
+            // Change "ORDER BY gpa DESC" to "ORDER BY s.roll_no ASC"
+            // Change the ORDER BY in your query string
+            String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa " +
                "FROM students s " +
                "LEFT JOIN semester_marks m ON s.roll_no = m.roll_no " +
                "WHERE s.class_id = ? " +
@@ -55,7 +61,9 @@ String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa
                 ));
             }
 
-            // 6. Convert to JSON including the GPA field
+            // 6. Convert to JSON 
+            // Uses Java Streams to map each Student object into a JSON string.
+            // The .collect(Collectors.joining(",")) puts commas between the student objects.
             String json = "[" + students.stream()
                 .map(s -> "{\"roll\":" + s.getRoll() + 
                           ",\"name\":\"" + s.getName() + 
@@ -63,13 +71,14 @@ String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa
                           ",\"class\":\"" + classId + "\"}")
                 .collect(Collectors.joining(",")) + "]";
 
-            out.print(json);
+            out.print(json); // Send the final array [{}, {}] to the client
             
             rs.close();
             pst.close();
             con.close();
 
         } catch (Exception e) {
+            // In case of error, return an empty JSON array to prevent frontend crashes
             e.printStackTrace();
             out.print("[]");
         }
@@ -78,6 +87,7 @@ String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Redirects POST requests to doGet so the logic only needs to be written once
         doGet(request, response);
     }
 }

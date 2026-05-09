@@ -1,3 +1,6 @@
+// Used to Make analysis by retriving data from the database
+// Used in analysis.jsp
+
 package com.mycompany.academicperformancetracker;
 
 import java.io.*;
@@ -15,25 +18,32 @@ public class GetStudentAnalysisServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        // Set response type to JSON so the frontend (AJAX/Fetch) knows how to parse it
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
+        // Retrieve parameters from the URL (e.g., ?roll=101&sem=3)
         String rollStr = request.getParameter("roll");
         String semStr = request.getParameter("sem"); 
         
+        // Basic validation: A student cannot be looked up without a roll number
         if (rollStr == null || rollStr.isEmpty()) {
             out.print("{\"error\":\"No roll number provided\"}");
             return;
         }
-
+        
+        // Default to Semester 1 if no specific semester is requested
         String selectedSem = (semStr == null || semStr.isEmpty()) ? "1" : semStr;
 
         try {
+            
+            // Load MySQL Driver and establish connection to the local database
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
 
             // 1. Student Profile Info
+            // Fetches basic identity details to display in the profile header
             String studentQuery = "SELECT name, class_id, phone FROM students WHERE roll_no = ?";
             PreparedStatement pst1 = con.prepareStatement(studentQuery);
             pst1.setString(1, rollStr);
@@ -45,10 +55,14 @@ public class GetStudentAnalysisServlet extends HttpServlet {
                 classId = rs1.getString("class_id");
                 phone = rs1.getString("phone");
             }
+            
+            // Logic to format class ID (e.g., "22CO12" becomes "22 COMP 12") for better readability
             String formattedClass = (classId != null && classId.length() >= 3) 
                 ? classId.substring(0, 2) + " COMP " + classId.substring(2) : classId;
 
-            // 2. Selected Semester SGPA
+            // --- SECTION 2: SELECTED SEMESTER SGPA ---
+            // Formula: Σ(GradePoint * Credits) / Σ(Credits)
+            // Excludes "Honors" subjects to keep the core SGPA standard
             String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as sgpa " +
                                "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
                                "WHERE sm.roll_no = ? AND sm.semester = ? AND sub.is_honors = 0";
@@ -59,7 +73,8 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             double semesterSGPA = 0.0;
             if (rsSgpa.next()) semesterSGPA = rsSgpa.getDouble("sgpa");
 
-            // 3. Overall CGPA
+            //SECTION 3: OVERALL CGPA
+            // Calculates cumulative performance across ALL semesters currently in the database
             String cgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) as total_points, SUM(sm.credits) as total_credits " +
                                "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
                                "WHERE sm.roll_no = ? AND sub.is_honors = 0 AND sm.credits > 0";
@@ -73,7 +88,8 @@ public class GetStudentAnalysisServlet extends HttpServlet {
                 if (tc > 0) cumulativeCGPA = tp / tc;
             }     
 
-            // 4. Trend Data
+            // --- SECTION 4: TREND DATA ---
+            // Groups GPA by semester to create a list of values (useful for Line Charts)
             String trendQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as avg_gp " +
                                 "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
                                 "WHERE sm.roll_no = ? AND sm.credits > 0 AND sub.is_honors = 0 " +
@@ -84,7 +100,9 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             List<String> trendData = new ArrayList<>();
             while (rsTrend.next()) trendData.add(String.format("%.2f", rsTrend.getDouble("avg_gp")));
 
-            // 5. Subject Marks (FIXED: Added marksJsonList.add)
+            // SECTION 5: SUBJECT MARKS 
+            // Uses a LEFT JOIN to ensure all subjects for a semester are shown, 
+            // even if the student hasn't received marks for them yet.
             String marksQuery = "SELECT sub.subject_code, sub.subject_name, sub.is_honors, " +
                    "sm.isa_total, sm.sea_marks, sm.grade_point, sm.grade " +
                    "FROM subjects sub " +
@@ -99,7 +117,8 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             while (rs2.next()) {
                 String gradeLetter = rs2.getString("grade");
                 if (gradeLetter == null || gradeLetter.isEmpty()) gradeLetter = "-";
-
+                
+                // Manual JSON construction for each subject object
                 String mJson = "{" +
                     "\"code\":\"" + rs2.getString("subject_code") + "\"," +
                     "\"name\":\"" + rs2.getString("subject_name").replace("\"", "\\\"") + "\"," +
@@ -109,10 +128,11 @@ public class GetStudentAnalysisServlet extends HttpServlet {
                     "\"gp\":" + rs2.getDouble("grade_point") + "," + 
                     "\"letter\":\"" + gradeLetter + "\"" +
                 "}";
-                marksJsonList.add(mJson); // THIS LINE WAS MISSING
+                marksJsonList.add(mJson);
             }
 
-            // 6. Build Final JSON
+            // SECTION 6: BUILD FINAL JSON 
+            // Combines all the pieces (profile, GPA, trends, marks) into one large JSON object
             String finalJson = "{" +
                 "\"name\":\"" + name.replace("\"", "\\\"") + "\"," +
                 "\"roll\":\"" + rollStr + "\"," +
@@ -129,6 +149,7 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             con.close();
 
         } catch (Exception e) {
+            // Error handling: Sends the exception message back as a JSON error
             out.print("{\"error\":\"" + e.getMessage().replace("\"", "'") + "\"}");
         }
     }

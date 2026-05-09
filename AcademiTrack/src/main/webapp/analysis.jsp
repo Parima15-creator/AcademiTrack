@@ -262,8 +262,7 @@ function updateChart(trendData) {
 //Removes the active (highlighted) class from all buttons.
 //Adds active to the clicked button.
 //Calls loadAnalysis with the new semester number.
-
-window.onload: When the page finishes loading, it automatically triggers loadAnalysis for Semester 4 by default.
+//window.onload: When the page finishes loading, it automatically triggers loadAnalysis for Semester 4 by default.
 document.querySelectorAll('#semSelector button').forEach(btn => {
     btn.addEventListener('click', function() {
         document.querySelectorAll('#semSelector button').forEach(b => b.classList.remove('active'));

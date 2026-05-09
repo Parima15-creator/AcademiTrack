@@ -1,3 +1,5 @@
+// Delete button from dashboard
+
 package com.mycompany.academicperformancetracker;
 
 import java.io.IOException;
@@ -27,7 +29,6 @@ public class DeleteStudentServlet extends HttpServlet {
             
             // 3. SQL QUERY: Deleting a specific row where the roll_no matches
             String sql = "DELETE FROM students WHERE roll_no = ?";
-            
             
             try (PreparedStatement pst = con.prepareStatement(sql)) {
                 pst.setString(1, rollNo);
