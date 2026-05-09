@@ -4,35 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>AcademiTrack | Internal Assessment Dashboard</title>
-    <style>
-        :root {
-            --primary-blue: #2c3e8c;
-            --accent-orange: #e67e22;
-            --bg-gray: #f4f7f6;
-            --white: #ffffff;
-            --success-green: #27ae60;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-gray); margin: 0; padding: 20px; }
-        .dashboard-card { background: var(--white); max-width: 1400px; margin: 0 auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 25px rgba(0,0,0,0.1); }
-        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .btn-container { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-        .back-btn, .edit-btn { color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: 0.3s; }
-        .back-btn { background: var(--primary-blue); }
-        .edit-btn { background: var(--accent-orange); }
-        .nav-container { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; align-items: center; }
-        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .filter-btn { background: #e0e0e0; color: #444; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
-        .filter-btn.active { background: var(--primary-blue); color: white; }
-        .search-box { width: 100%; max-width: 300px; padding: 10px; border-radius: 20px; border: 1px solid #ccc; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto; }
-        table { width: 100%; border-collapse: collapse; background: white; font-size: 14px; }
-        th { background: var(--primary-blue); color: white; padding: 12px; border: 1px solid #ddd; }
-        td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        .row-avg { background-color: #fffceb; font-weight: 600; }
-        .row-total { background-color: #eef2ff; font-weight: bold; color: var(--primary-blue); }
-        .sub-name-header { display: block; font-size: 0.8em; font-weight: normal; margin-top: 4px; color: #e0e0e0; }
-        .mark-input { width: 50px; text-align: center; padding: 4px; border: 1px solid #3498db; border-radius: 4px; }
-        .loading-overlay { text-align: center; padding: 40px; color: #666; }
-    </style>
+    <link rel="stylesheet" href="view-isa--sea-marks.css">
 </head>
 <body>
 
