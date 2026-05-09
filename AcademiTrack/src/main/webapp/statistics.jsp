@@ -8,7 +8,10 @@
     <meta charset="UTF-8">
     <title>AcademiTrack | Performance Analytics</title>
     <link rel="stylesheet" href="dashboardstyle.css">
+    
+    <!-- External Library: Chart.js for rendering Pie, Bar, and Line charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
 
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 25px; margin-top: 20px; }
@@ -33,6 +36,7 @@
 </head>
 <body>
 
+<!-- Navigation Sidebar -->
 <div class="sidebar">
     <div class="sidebar-top">
         <div class="logo">🎓 AcademiTrack</div>
@@ -43,7 +47,9 @@
     </div>
     <button class="logout" onclick="location.href='LogoutServlet'">Logout</button>
 </div>
-    
+
+
+<!-- Main dashboard -->
 <div class="main">
     <div class="user-welcome"><span>Welcome, <strong>${facultyName}</strong> 👋</span></div>
     <h1>Performance Analytics</h1>
@@ -60,6 +66,7 @@
         <button onclick="selectClass(this, 'SE2')">BE Comp 2</button>
     </div>
     
+    <!-- Hidden by default; revealed via JavaScript once a class is selected. -->
     <div id="semSection" style="display: none; margin-top: 20px;">
         <h3>Select Semester</h3>
         <div class="class-buttons" id="semGroup">
@@ -73,27 +80,32 @@
             <button onclick="selectSemester(this, '4')">Sem 8</button>
         </div>
     </div>
+    
+            <!--This section is populated via AJAX once Class and Sem are selected. -->
             <div id="statsContent" style="display: none; margin-top: 30px;">
                 <div style="margin-bottom: 20px;">
                     <select id="subjectSelect" class="action-btn" style="background: white; color: #2c4aa5; padding: 10px; border-radius: 8px;" onchange="loadStats()">
                         <option value="">View Toppers for Subject</option>
+                        <!-- Options are injected dynamically based on the syllabus of the selected semester -->
                     </select>
                 </div>  
                 
+            <!-- Filter: Allows viewing toppers specific to a single subject -->
             <div class="stat-card full-width">
                 <h3>Subject Toppers (Top 5)</h3>
                 <table class="topper-table">
                     <thead><tr><th>Rank</th><th>Name</th><th>Total Marks</th></tr></thead>
                     <tbody id="topperBody"></tbody>
+                    <!-- Options are injected dynamically-->
                 </table>
             </div>
                 
-                <div class="stats-grid">
-                    <div class="stat-card" style="text-align: center;">
+            <!-- Numeric Metric: Total number of students who passed all subjects -->
+            <div class="stats-grid">
+                <div class="stat-card" style="text-align: center;">
                 <h3>Passed Students</h3>
                 <div class="metric-value" id="passMetric">0</div>
                 <p>Cleared all non-honours subjects</p>
-
             </div>
             <!-- Block 2: Failed Students -->
             <div class="stat-card" styl e="text-align: center;">
