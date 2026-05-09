@@ -34,7 +34,7 @@ function selectSemester(btn, sem) {
     document.getElementById('statsContent').style.display = 'block';
     
     // Reset dropdown and table for new context
-    document.getElementById('subjectSelect').innerHTML = '<option value="">-- View Toppers for Subject --</option>';
+    document.getElementById('subjectSelect').innerHTML = '<option value="">View Toppers for Subject</option>';
     document.getElementById('topperBody').innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
     
     loadStats();
