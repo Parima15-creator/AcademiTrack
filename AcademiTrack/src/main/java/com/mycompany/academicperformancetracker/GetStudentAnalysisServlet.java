@@ -63,9 +63,9 @@ public class GetStudentAnalysisServlet extends HttpServlet {
             // --- SECTION 2: SELECTED SEMESTER SGPA ---
             // Formula: Σ(GradePoint * Credits) / Σ(Credits)
             // Excludes "Honors" subjects to keep the core SGPA standard
-            String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) / SUM(sm.credits) as sgpa " +
-                               "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
-                               "WHERE sm.roll_no = ? AND sm.semester = ? AND sub.is_honors = 0";
+                String sgpaQuery = "SELECT SUM(sm.grade_point * sm.credits) * 1.0 / SUM(sm.credits) as sgpa " +
+                   "FROM semester_marks sm JOIN subjects sub ON sm.subject_code = sub.subject_code " +
+                   "WHERE sm.roll_no = ? AND sm.semester = ? AND sub.is_honors = 0";
             PreparedStatement pstSgpa = con.prepareStatement(sgpaQuery);
             pstSgpa.setString(1, rollStr);
             pstSgpa.setString(2, selectedSem);

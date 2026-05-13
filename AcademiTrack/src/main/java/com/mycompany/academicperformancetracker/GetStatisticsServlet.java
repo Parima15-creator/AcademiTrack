@@ -94,6 +94,33 @@ public class GetStatisticsServlet extends HttpServlet {
                         result.put("recoveredCount", rsRec.getInt("recovered_students"));
                     }
                 }
+                // --- 7. OVERALL CLASS TOPPERS (Semester-wide) ---
+                // --- 7. OVERALL CLASS TOPPERS (Using Analysis Logic) ---
+                JSONArray classToppers = new JSONArray();
+                // We use a JOIN with the subjects table to filter out is_honors = 1
+                String classTopSql = "SELECT s.name, " +
+                                     "SUM(m.grade_point * m.credits) / SUM(m.credits) as sgpa " +
+                                     "FROM students s " +
+                                     "JOIN semester_marks m ON s.roll_no = m.roll_no " +
+                                     "JOIN subjects sub ON m.subject_code = sub.subject_code " +
+                                     "WHERE s.class_id = ? AND m.semester = ? AND sub.is_honors = 0 " +
+                                     "GROUP BY s.roll_no, s.name " +
+                                     "HAVING SUM(m.credits) > 0 " +
+                                     "ORDER BY sgpa DESC LIMIT 3";
+
+                try (PreparedStatement psCT = con.prepareStatement(classTopSql)) {
+                    psCT.setString(1, classId.trim());
+                    psCT.setString(2, sem.trim());
+                    ResultSet rsCT = psCT.executeQuery();
+                    while (rsCT.next()) {
+                        JSONObject t = new JSONObject();
+                        t.put("name", rsCT.getString("name"));
+                        t.put("sgpa", rsCT.getDouble("sgpa"));
+                        classToppers.put(t);
+                    }
+                }
+                result.put("classToppers", classToppers);
+                result.put("classToppers", classToppers);
                 // 3. SUBJECT-WISE PASS %
                 JSONArray subStats = new JSONArray();
                 String rateSql = "SELECT subject_code, ROUND((COUNT(CASE WHEN grade!='F' THEN 1 END)*100.0/COUNT(*)),1) as rate " +

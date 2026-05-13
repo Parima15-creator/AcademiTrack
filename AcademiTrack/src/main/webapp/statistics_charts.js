@@ -77,6 +77,25 @@ function loadStats() {
 
             // 6. Update Toppers Table
             updateToppersTable(data.subjectToppers);
+            
+            // 7. Update Overall Class Toppers
+            const ctList = document.getElementById('classToppersList');
+            if (ctList) {
+                if (data.classToppers && data.classToppers.length > 0) {
+                    const medals = ['🥇', '🥈', '🥉'];
+                    ctList.innerHTML = data.classToppers.map((t, i) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee;">
+                            <span>
+                                <span style="font-size: 1.2rem; margin-right: 10px;">${medals[i]}</span>
+                                <strong>${t.name}</strong>
+                            </span>
+                            <span class="score-badge">${parseFloat(t.sgpa).toFixed(2)} SGPA</span>
+                        </div>
+                    `).join('');
+                } else {
+                    ctList.innerHTML = "<p style='text-align:center; color:#999; padding: 20px;'>No topper data found for this semester.</p>";
+                }
+            }
         })
         .catch(err => console.error("Fetch Error:", err));
 }

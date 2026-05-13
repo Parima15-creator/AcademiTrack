@@ -88,7 +88,13 @@
             </table>
         </div>
 
+
         <div class="stats-grid">
+            <div class="stat-card">
+            <h3>Overall Class Toppers</h3>
+            <div id="classToppersList"> <p style="text-align:center; color:#999;">Loading toppers...</p>
+            </div>
+        </div>
             <div class="stat-card" style="text-align: center;">
                 <h3>Total Appeared</h3>
                 <div class="metric-value" id="totalAppeared">0</div>
@@ -107,6 +113,7 @@
                     <p id="failCountLabel" style="font-size: 0.8rem; color: #888;">0 students failed</p>
                 </div>
             </div>
+            
             
             <div class="stat-card" style="text-align: center;"> <h3>Backlog Recovery</h3>
                 <div class="metric-value" id="recoveryMetric" style="color: #f1c40f;">0</div> <p>Students cleared their previous Backlogs</p>
