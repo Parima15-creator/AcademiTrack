@@ -154,6 +154,11 @@ function loadSemesterDashboard() {
                         
                         // 6. Handle Edit Mode: Replace text with <input> fields
                         // Note: "Total" is always read-only as it's a sum
+                        if (selectedSem === "4") {
+        if (val === "undefined" || val === null || val === undefined || val === "") {
+            val = "-";
+        }
+    }
                         if (isEditMode && type !== "Total") {
                             let inputType = (type === "Grade") ? "text" : "number";
                             tr.innerHTML += '<td><input type="' + inputType + '" class="mark-input" value="' + val + '" data-roll="' + roll + '" data-sub="' + subCode + '" data-type="' + type + '"></td>';

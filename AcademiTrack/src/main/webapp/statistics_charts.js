@@ -2,133 +2,104 @@ let selectedClass = null;
 let selectedSem = null;
 let chartInstances = {};
 
-/**
- * Step 1: Handle Class Selection
- */
 function selectClass(btn, cls) {
-    // 1. Remove 'active' class from all buttons in the Class group
-    const classButtons = document.querySelectorAll('#classGroup button');
-    classButtons.forEach(b => b.classList.remove('active'));
-
-    // 2. Add 'active' class to the clicked button
+    document.querySelectorAll('#classGroup button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // 3. Existing logic to show next section
     selectedClass = cls;
     document.getElementById('semSection').style.display = 'block';
     document.getElementById('statsContent').style.display = 'none';
 }
 
-
-/**
- * Step 2: Handle Semester Selection
- */
 function selectSemester(btn, sem) {
-    // 1. Remove 'active' class from all buttons in the Semester group
-    const semButtons = document.querySelectorAll('#semGroup button');
-    semButtons.forEach(b => b.classList.remove('active'));
-
-    // 2. Add 'active' class to the clicked button
+    document.querySelectorAll('#semGroup button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
-    // 3. Existing logic to load data
     selectedSem = sem;
     document.getElementById('statsContent').style.display = 'block';
     
-    // Clear dropdown so it repopulates for the new semester
-    const subDropdown = document.getElementById('subjectSelect');
-    subDropdown.innerHTML = '<option value="">Select Subject to View Toppers</option>';
-    
+    // Clear dropdown so it repopulates
+    document.getElementById('subjectSelect').innerHTML = '<option value="">Select Subject to View Toppers</option>';
     loadStats();
 }
 
 /**
- * Step 3: Fetch and Render Data
+ * Fetches and renders all statistical data for the selected Class and Semester.
+ */
+/**
+ * Fetches and renders all statistical data, including detailed failure info.
  */
 function loadStats() {
     if (!selectedClass || !selectedSem) return;
+    
+    const subSelect = document.getElementById('subjectSelect');
+    const sub = subSelect.value;
 
-    const sub = document.getElementById('subjectSelect').value;
-
-    // Fetching data from the Servlet
     fetch(`GetStatisticsServlet?class=${selectedClass}&sem=${selectedSem}&subject=${sub}`)
         .then(res => res.json())
         .then(data => {
-            console.log("Dashboard Data Received:", data);
-
-            // 1. Update Numeric Metrics
+            // 1. Basic Numeric Metrics
+            document.getElementById('totalAppeared').innerText = data.totalAppeared || 0;
             document.getElementById('passMetric').innerText = data.passCount || 0;
             document.getElementById('failMetric').innerText = data.failCount || 0;
-            document.getElementById('reattemptCount').innerText = data.reattemptSuccess || 0;
+            
+            let passPercent = data.totalAppeared > 0 ? ((data.passCount / data.totalAppeared) * 100).toFixed(1) : 0;
+            document.getElementById('passPercentage').innerText = passPercent + "%";
 
-            // 2. Populate Subject Dropdown (if empty)
-            // --- 2. POPULATE SUBJECT DROPDOWN ---
-            const subDropdown = document.getElementById('subjectSelect');
+            // 2. Populate Highest Failure Detail (Inside the Failed Students card)
+            // Inside loadStats() -> .then(data => { ...
+            const subLabel = document.getElementById('toughestSubject');
+            const countLabel = document.getElementById('failCountLabel');
 
-            // Only populate if it's currently empty
-            if (subDropdown.options.length <= 1 && data.subjects) {
+            if (data.highestFailCount > 0) {
+                subLabel.innerText = data.toughestSubject;
+                countLabel.innerText = data.highestFailCount + " student(s) failed this subject";
+            } else {
+                // This part runs if 3 students failed overall, but no specific subject has an 'F' record
+                subLabel.innerText = "No specific subject failures found";
+                countLabel.innerText = "Check if grades are updated for all subjects";
+            }
+
+            // 3. Populate Subject Dropdown (if empty)
+            if (subSelect.options.length <= 1 && data.subjects) {
                 data.subjects.forEach(s => {
-                    // Display format: "CMP 202 - Data Structures"
-                    let displayText = `${s.code} - ${s.name}`;
-                    let opt = new Option(displayText, s.code);
-
-                    // CSS Fix: Ensure text is dark and visible
-                    opt.style.color = "#2c4aa5"; 
-                    opt.style.background = "white";
-
-                    subDropdown.add(opt);
+                    subSelect.add(new Option(`${s.code} - ${s.name}`, s.code));
                 });
             }
-            // 3. Render Pass/Fail Doughnut Chart
+
+            // 4. Render Charts
             renderChart('pfChart', 'doughnut', ['Passed', 'Failed'], 
-                        [data.passCount, data.failCount], ['#27ae60', '#e74c3c']);
+                        [data.passCount, data.failCount], ['#27ae60', '#e74c3c'], 'Count');
             
-            // 4. Render GPA Comparison Bar Chart
-            const compLabels = data.comparison ? data.comparison.map(c => c.class) : [];
-            const compGPAs = data.comparison ? data.comparison.map(c => c.avgGpa) : [];
-            renderChart('compareChart', 'bar', compLabels, compGPAs, '#4e73df');
+            const subLabels = data.subjectStats ? data.subjectStats.map(s => s.code) : [];
+            const subPassRates = data.subjectStats ? data.subjectStats.map(s => s.passRate) : [];
+            renderChart('subjectPassChart', 'bar', subLabels, subPassRates, '#3498db', 'Pass %');
 
             // 5. Update Toppers Table
-            const tBody = document.getElementById('topperBody');
-            tBody.innerHTML = ""; 
-            
-            if (data.subjectToppers && data.subjectToppers.length > 0) {
-                data.subjectToppers.forEach((t, i) => {
-                    tBody.innerHTML += `
-                        <tr>
-                            <td><strong>#${i + 1}</strong></td>
-                            <td>${t.name}</td>
-                            <td><span class="score-badge">${t.score.toFixed(1)}</span></td>
-                        </tr>`;
-                });
-            } else {
-                tBody.innerHTML = "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
-            }
+            updateToppersTable(data.subjectToppers);
         })
         .catch(err => console.error("Fetch Error:", err));
 }
 
-/**
- * Helper: Chart.js Wrapper
- */
-function renderChart(id, type, labels, data, colors) {
-    // Prevent overlapping charts by destroying old instance
+
+function updateToppersTable(toppers) {
+    const tBody = document.getElementById('topperBody');
+    tBody.innerHTML = (toppers && toppers.length > 0) 
+        ? toppers.map((t, i) => `<tr><td><strong>#${i+1}</strong></td><td>${t.name}</td><td><span class="score-badge">${t.score.toFixed(1)}</span></td></tr>`).join('')
+        : "<tr><td colspan='3' style='text-align:center;'>Select a subject to see toppers</td></tr>";
+}
+
+function renderChart(id, type, labels, data, colors, labelName) {
     if (chartInstances[id]) chartInstances[id].destroy();
-    
     const ctx = document.getElementById(id).getContext('2d');
     chartInstances[id] = new Chart(ctx, {
         type: type,
         data: {
             labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors,
-                borderWidth: 1
-            }]
+            datasets: [{ label: labelName, data: data, backgroundColor: colors, borderWidth: 1 }]
         },
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
+            scales: type === 'bar' ? { y: { beginAtZero: true, max: 100 } } : {},
             plugins: { legend: { position: 'bottom' } }
         }
     });
