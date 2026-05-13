@@ -1,7 +1,5 @@
-//Instead of the frontend having to deal with thousands of student records. 
-//This servlet takes a specific parameter (like class_id) and asks the database only for the relevant students.
-
-//It doesn't just get names; it calculates the Average Grade Point for every student in that class instantly.
+// Used in dashboard.jsp 
+// When the teacher clicks on the class name, list of student appears
 
 package com.mycompany.academicperformancetracker;
 
@@ -20,6 +18,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * GetStudentsServlet
+ * This servlet fetches the list of students for a specific class to populate the dashboard.
+ * Calculations are omitted here as detailed analysis is handled by GetStudentAnalysisServlet.
+ */
 @WebServlet(name = "GetStudentsServlet", urlPatterns = {"/GetStudentsServlet"})
 public class GetStudentsServlet extends HttpServlet {
 
@@ -30,55 +33,57 @@ public class GetStudentsServlet extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
         
-        // Identify which class we are fetching students for
+        // Identify which class we are fetching students for from the request parameter
         String classId = request.getParameter("class");
         List<Student> students = new ArrayList<>();
 
+        // Basic validation: Return empty if no class ID is provided
+        if (classId == null || classId.isEmpty()) {
+            out.print("[]");
+            return;
+        }
+
         try {
+            // Load MySQL Driver and establish connection
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
 
-            // 4. QUERY: Calculates GPA and joins with marks automatically
-            // Change "ORDER BY gpa DESC" to "ORDER BY s.roll_no ASC"
-            // Change the ORDER BY in your query string
-            String query = "SELECT s.roll_no, s.name, IFNULL(AVG(m.grade_point), 0.0) as gpa " +
-               "FROM students s " +
-               "LEFT JOIN semester_marks m ON s.roll_no = m.roll_no " +
-               "WHERE s.class_id = ? " +
-               "GROUP BY s.roll_no, s.name " +
-               "ORDER BY s.roll_no ASC"; // This ensures numerical order in the table
+            // Simplified SQL query focusing only on identity details
+            // Ordered by roll number to ensure a consistent list in the dashboard
+            String query = "SELECT roll_no, name FROM students WHERE class_id = ? ORDER BY roll_no ASC";
+            
             PreparedStatement pst = con.prepareStatement(query);
             pst.setString(1, classId);
             ResultSet rs = pst.executeQuery();
 
-            // 5. Populate student list with GPA
+            // Populate the list with Student objects
+            // Passing 0.0 for GPA since the dashboard does not display it
             while (rs.next()) {
                 students.add(new Student(
                     rs.getInt("roll_no"), 
                     rs.getString("name"), 
-                    rs.getDouble("gpa")
+                    0.0 
                 ));
             }
 
-            // 6. Convert to JSON 
-            // Uses Java Streams to map each Student object into a JSON string.
-            // The .collect(Collectors.joining(",")) puts commas between the student objects.
+            // Convert to JSON using Java Streams for a clean array format
             String json = "[" + students.stream()
-                .map(s -> "{\"roll\":" + s.getRoll() + 
-                          ",\"name\":\"" + s.getName() + 
-                          "\",\"gpa\":" + String.format("%.2f", s.getGpa()) + 
-                          ",\"class\":\"" + classId + "\"}")
+                .map(s -> "{" +
+                          "\"roll\":" + s.getRoll() + "," +
+                          "\"name\":\"" + s.getName().replace("\"", "\\\"") + "\"," +
+                          "\"class\":\"" + classId + "\"" +
+                          "}")
                 .collect(Collectors.joining(",")) + "]";
 
-            out.print(json); // Send the final array [{}, {}] to the client
+            out.print(json); 
             
             rs.close();
             pst.close();
             con.close();
 
         } catch (Exception e) {
-            // In case of error, return an empty JSON array to prevent frontend crashes
+            // Log error and return an empty array to prevent dashboard crashes
             e.printStackTrace();
             out.print("[]");
         }
@@ -87,7 +92,7 @@ public class GetStudentsServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Redirects POST requests to doGet so the logic only needs to be written once
+        // Reuse doGet logic for POST requests
         doGet(request, response);
     }
 }

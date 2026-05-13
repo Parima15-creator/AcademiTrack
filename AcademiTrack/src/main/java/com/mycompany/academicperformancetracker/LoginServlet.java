@@ -10,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
+// When a form submits to this URL, this class handles the request.
 @WebServlet("/LoginServlet")
 public class LoginServlet extends HttpServlet {
     @Override
