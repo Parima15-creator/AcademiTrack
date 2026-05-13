@@ -54,31 +54,46 @@ public class GetStatisticsServlet extends HttpServlet {
                 }
                 
                 // --- 5. SUBJECT WITH HIGHEST FAILURE RATE ---
-                // --- 5. SUBJECT WITH HIGHEST FAILURE RATE (Robust Version) ---
-                // --- 5. SUBJECT WITH HIGHEST FAILURE RATE ---
-String failRateSql = "SELECT m.subject_code, s.subject_name, COUNT(*) as fail_count " +
-                     "FROM semester_marks m " +
-                     "JOIN subjects s ON TRIM(m.subject_code) = TRIM(s.subject_code) " +
-                     "WHERE TRIM(m.semester) = ? " +
-                     "AND TRIM(m.roll_no) IN (SELECT roll_no FROM students WHERE TRIM(class_id) = ?) " +
-                     "AND TRIM(m.grade) = 'F' " + 
-                     "GROUP BY m.subject_code, s.subject_name " +
-                     "ORDER BY fail_count DESC LIMIT 1";
+                    
+                String failRateSql = "SELECT m.subject_code, s.subject_name, COUNT(*) as fail_count " +
+                                     "FROM semester_marks m " +
+                                     "JOIN subjects s ON TRIM(m.subject_code) = TRIM(s.subject_code) " +
+                                     "WHERE TRIM(m.semester) = ? " +
+                                     "AND TRIM(m.roll_no) IN (SELECT roll_no FROM students WHERE TRIM(class_id) = ?) " +
+                                     "AND TRIM(m.grade) = 'F' " + 
+                                     "GROUP BY m.subject_code, s.subject_name " +
+                                     "ORDER BY fail_count DESC LIMIT 1";
 
-try (PreparedStatement psFail = con.prepareStatement(failRateSql)) {
-    psFail.setString(1, sem.trim());
-    psFail.setString(2, classId.trim());
-    ResultSet rsFail = psFail.executeQuery();
-    
-    if (rsFail.next()) {
-        // Concatenate code and name for the UI
-        result.put("toughestSubject", rsFail.getString("subject_code") + ": " + rsFail.getString("subject_name"));
-        result.put("highestFailCount", rsFail.getInt("fail_count"));
-    } else {
-        result.put("toughestSubject", "None");
-        result.put("highestFailCount", 0);
-    }
-}
+                try (PreparedStatement psFail = con.prepareStatement(failRateSql)) {
+                    psFail.setString(1, sem.trim());
+                    psFail.setString(2, classId.trim());
+                    ResultSet rsFail = psFail.executeQuery();
+
+                    if (rsFail.next()) {
+                        // Concatenate code and name for the UI
+                        result.put("toughestSubject", rsFail.getString("subject_code") + ": " + rsFail.getString("subject_name"));
+                        result.put("highestFailCount", rsFail.getInt("fail_count"));
+                    } else {
+                        result.put("toughestSubject", "None");
+                        result.put("highestFailCount", 0);
+                    }
+                }
+                
+                // --- 6. BACKLOG RECOVERY RATE ---
+                // --- 6. BACKLOG RECOVERY RATE (Class-Specific Fix) ---
+                String recoverySql = "SELECT COUNT(DISTINCT roll_no) as recovered_students " +
+                     "FROM semester_marks " +
+                     "WHERE cleared_in_sem = ? " + // Change IS NOT NULL to = ?
+                     "AND roll_no IN (SELECT roll_no FROM students WHERE TRIM(class_id) = ?)";
+
+                try (PreparedStatement psRec = con.prepareStatement(recoverySql)) {
+                    psRec.setString(1, sem.trim()); // Filter by current semester
+                    psRec.setString(2, classId.trim()); // Pass the selected class ID
+                    ResultSet rsRec = psRec.executeQuery();
+                    if (rsRec.next()) {
+                        result.put("recoveredCount", rsRec.getInt("recovered_students"));
+                    }
+                }
                 // 3. SUBJECT-WISE PASS %
                 JSONArray subStats = new JSONArray();
                 String rateSql = "SELECT subject_code, ROUND((COUNT(CASE WHEN grade!='F' THEN 1 END)*100.0/COUNT(*)),1) as rate " +

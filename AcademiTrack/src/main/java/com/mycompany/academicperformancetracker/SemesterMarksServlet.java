@@ -30,20 +30,21 @@ public class SemesterMarksServlet extends HttpServlet {
 
             // 1. Fetch all subject names to build headers
             // Adding a WHERE clause to filter by the selected semester
-String subSql = "SELECT subject_code, subject_name FROM subjects WHERE semester = ?";
-PreparedStatement subPst = con.prepareStatement(subSql);
-subPst.setString(1, sem); // 'sem' is the parameter from the request
-ResultSet subRs = subPst.executeQuery();
+            String subSql = "SELECT subject_code, subject_name FROM subjects WHERE semester = ?";
+            PreparedStatement subPst = con.prepareStatement(subSql);
+            subPst.setString(1, sem); // 'sem' is the parameter from the request
+            ResultSet subRs = subPst.executeQuery();
             
             while(subRs.next()) {
                 subjectNames.put(subRs.getString("subject_code"), subRs.getString("subject_name"));
             }
 
             // 2. Fetch students of the class and join with semester marks
-            String sql = "SELECT s.roll_no, s.name, m.subject_code, m.isa_total, m.sea_marks, m.credits, m.grade_point, m.grade " +
-                         "FROM students s " +
-                         "LEFT JOIN semester_marks m ON s.roll_no = m.roll_no AND m.semester = ? " +
-                         "WHERE s.class_id = ? ORDER BY s.roll_no";
+           
+            String sql = "SELECT s.roll_no, s.name, m.subject_code, m.isa_total, m.sea_marks, m.credits, m.grade_point, m.grade, m.cleared_in_sem " +
+             "FROM students s " +
+             "LEFT JOIN semester_marks m ON s.roll_no = m.roll_no AND m.semester = ? " +
+             "WHERE s.class_id = ? ORDER BY s.roll_no";
             
             PreparedStatement pst = con.prepareStatement(sql);
             pst.setString(1, sem);
@@ -67,6 +68,10 @@ ResultSet subRs = subPst.executeQuery();
                     mObj.put("credits", rs.getInt("credits"));
                     mObj.put("gp", rs.getDouble("grade_point"));
                     mObj.put("grade", rs.getString("grade"));
+
+                    // ADD THIS LINE BELOW
+                    mObj.put("cleared_in_sem", rs.getInt("cleared_in_sem")); 
+
                     studentsJson.getJSONObject(roll).getJSONObject("subjects").put(subCode, mObj);
                 }
             }

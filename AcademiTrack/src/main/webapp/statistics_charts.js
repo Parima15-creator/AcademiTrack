@@ -24,9 +24,6 @@ function selectSemester(btn, sem) {
 /**
  * Fetches and renders all statistical data for the selected Class and Semester.
  */
-/**
- * Fetches and renders all statistical data, including detailed failure info.
- */
 function loadStats() {
     if (!selectedClass || !selectedSem) return;
     
@@ -41,11 +38,13 @@ function loadStats() {
             document.getElementById('passMetric').innerText = data.passCount || 0;
             document.getElementById('failMetric').innerText = data.failCount || 0;
             
+            // Update the Recovery Metric
+            document.getElementById('recoveryMetric').innerText = data.recoveredCount || 0;
+            
             let passPercent = data.totalAppeared > 0 ? ((data.passCount / data.totalAppeared) * 100).toFixed(1) : 0;
             document.getElementById('passPercentage').innerText = passPercent + "%";
 
-            // 2. Populate Highest Failure Detail (Inside the Failed Students card)
-            // Inside loadStats() -> .then(data => { ...
+            // 2. Highest Failure Detail
             const subLabel = document.getElementById('toughestSubject');
             const countLabel = document.getElementById('failCountLabel');
 
@@ -53,32 +52,34 @@ function loadStats() {
                 subLabel.innerText = data.toughestSubject;
                 countLabel.innerText = data.highestFailCount + " student(s) failed this subject";
             } else {
-                // This part runs if 3 students failed overall, but no specific subject has an 'F' record
-                subLabel.innerText = "No specific subject failures found";
-                countLabel.innerText = "Check if grades are updated for all subjects";
+                subLabel.innerText = "None (All Passed)";
+                countLabel.innerText = "0 students failed";
             }
 
-            // 3. Populate Subject Dropdown (if empty)
+            // 3. Subject Dropdown
             if (subSelect.options.length <= 1 && data.subjects) {
                 data.subjects.forEach(s => {
                     subSelect.add(new Option(`${s.code} - ${s.name}`, s.code));
                 });
             }
 
-            // 4. Render Charts
-            renderChart('pfChart', 'doughnut', ['Passed', 'Failed'], 
-                        [data.passCount, data.failCount], ['#27ae60', '#e74c3c'], 'Count');
+            // 4. Render 3-Way Status Chart (Doughnut)
+            const statusLabels = ['Passed', 'Failed', 'Recovered'];
+            const statusData = [data.passCount, data.failCount, data.recoveredCount || 0];
+            const statusColors = ['#27ae60', '#e74c3c', '#f1c40f']; // Green, Red, Yellow
             
+            renderChart('pfChart', 'doughnut', statusLabels, statusData, statusColors, 'Students');
+            
+            // 5. Render Subject-wise Pass % (Bar)
             const subLabels = data.subjectStats ? data.subjectStats.map(s => s.code) : [];
             const subPassRates = data.subjectStats ? data.subjectStats.map(s => s.passRate) : [];
             renderChart('subjectPassChart', 'bar', subLabels, subPassRates, '#3498db', 'Pass %');
 
-            // 5. Update Toppers Table
+            // 6. Update Toppers Table
             updateToppersTable(data.subjectToppers);
         })
         .catch(err => console.error("Fetch Error:", err));
 }
-
 
 function updateToppersTable(toppers) {
     const tBody = document.getElementById('topperBody');
@@ -90,17 +91,36 @@ function updateToppersTable(toppers) {
 function renderChart(id, type, labels, data, colors, labelName) {
     if (chartInstances[id]) chartInstances[id].destroy();
     const ctx = document.getElementById(id).getContext('2d');
+    
+    // Determine the max scale: 100 for percentage charts, auto for count charts
+    const yAxesConfig = (type === 'bar' && labelName.includes('%')) 
+                        ? { beginAtZero: true, max: 100 } 
+                        : { beginAtZero: true };
+
     chartInstances[id] = new Chart(ctx, {
         type: type,
         data: {
             labels: labels,
-            datasets: [{ label: labelName, data: data, backgroundColor: colors, borderWidth: 1 }]
+            datasets: [{ 
+                label: labelName, 
+                data: data, 
+                backgroundColor: colors, 
+                borderWidth: 1 
+            }]
         },
         options: { 
             responsive: true, 
             maintainAspectRatio: false,
-            scales: type === 'bar' ? { y: { beginAtZero: true, max: 100 } } : {},
-            plugins: { legend: { position: 'bottom' } }
+            scales: type === 'bar' ? { y: yAxesConfig } : {},
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                } 
+            }
         }
     });
 }

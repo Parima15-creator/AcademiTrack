@@ -155,3 +155,9 @@ td {
     padding: 40px; 
     color: #666; 
 }
+
+.fail-grade { 
+    color: #e74c3c !important; /* Brighter red */
+    font-weight: 800 !important; 
+    background-color: #fdeaea !important; /* Light red background for visibility */
+}

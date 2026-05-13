@@ -18,6 +18,19 @@
         .topper-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         .topper-table th { text-align: left; padding: 12px; border-bottom: 2px solid #eee; color: #666; }
         .topper-table td { padding: 15px 12px; border-bottom: 1px solid #f9f9f9; }
+        /* Change this in your style section */
+        .stat-card.recovery-card, 
+            #recoveryMetricContainer, 
+            .stat-card[style*="border-left"] { 
+                border-left: none !important; 
+            }
+
+            /* Polish the failure highlight inside the card */
+            #highestFailContainer {
+                border-top: 1px dashed #eee;
+                margin-top: 15px;
+                padding-top: 10px;
+            }
     </style>
 </head>
 <body>
@@ -94,6 +107,11 @@
                     <p id="failCountLabel" style="font-size: 0.8rem; color: #888;">0 students failed</p>
                 </div>
             </div>
+            
+            <div class="stat-card" style="text-align: center;"> <h3>Backlog Recovery</h3>
+                <div class="metric-value" id="recoveryMetric" style="color: #f1c40f;">0</div> <p>Students cleared their previous Backlogs</p>
+            </div>
+            
             <div class="stat-card" style="text-align: center;">
                 <h3>Pass Percentage</h3>
                 <div class="metric-value" id="passPercentage">0%</div>

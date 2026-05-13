@@ -73,14 +73,14 @@
 let isEditMode = false;
 
 // The 6 categories of data displayed for every student per subject
-const rowTypes = ["ISA", "SEA", "Total", "Credits Earned", "Grade Point", "Grade"];
+const rowTypes = ["ISA", "SEA", "Total", "Credits Earned", "Grade Point", "Grade", "Cleared In"];
 
 //Fetches data from the server and builds the table dynamically
 function loadSemesterDashboard() {
     // 1. Identify which Class and Semester are currently selected
     const activeClassBtn = document.querySelector('#classGroup .active');
     const activeSemBtn = document.querySelector('#semGroup .active');
-    if(!activeClassBtn || !activeSemBtn) return;
+    if (!activeClassBtn || !activeSemBtn) return;
 
     const selectedClass = activeClassBtn.getAttribute('data-code');
     const selectedSem = activeSemBtn.innerText.replace("Semester ", "");
@@ -88,19 +88,19 @@ function loadSemesterDashboard() {
     const tbody = document.querySelector('#tbody');
     const theadRow = document.querySelector('#theadRow');
     
-    // Show loading state while waiting for the Servlet
+    // Show loading state
     tbody.innerHTML = "<tr><td colspan='10' class='loading-overlay'>Loading...</td></tr>";
 
-    // 2. Fetch JSON data from the SemesterMarksServlet
+    // 2. Fetch JSON data from the Servlet
     fetch('SemesterMarksServlet?class=' + encodeURIComponent(selectedClass) + '&sem=' + encodeURIComponent(selectedSem))
         .then(res => res.json())
         .then(data => {
-            tbody.innerHTML = "";  // Clear the loading message
-    
-            // Extract and sort subject codes (e.g., [CS1, CS2, CS3])
+            tbody.innerHTML = ""; // Clear loading message
+
+            // Extract and sort subject codes
             const subjects = Object.keys(data.subjectNames || {}).sort();
             
-            // 3. Rebuild the Table Header based on the subjects returned
+            // 3. Rebuild the Table Header
             theadRow.innerHTML = '<th>Roll No</th><th>Name</th><th>Result Type</th>';
             subjects.forEach(subCode => { 
                 let fullName = data.subjectNames[subCode] || "";
@@ -113,7 +113,6 @@ function loadSemesterDashboard() {
                     '</th>'; 
             });
             
-            // Handle case where no students exist for the selection
             if (!data.students || Object.keys(data.students).length === 0) {
                 tbody.innerHTML = "<tr><td colspan='10'>No records found.</td></tr>";
                 return;
@@ -123,54 +122,70 @@ function loadSemesterDashboard() {
             for (let roll in data.students) {
                 let s = data.students[roll];
                 
-                // For every student, create 6 rows (ISA, SEA, Total, etc.)
+                // Iterating through all 7 row types
                 rowTypes.forEach((type, index) => {
                     let tr = document.createElement('tr');
                     tr.className = 'student-row';
-                    
-                    // These attributes help with the search/filter feature
                     tr.setAttribute('data-student-name', s.name.toLowerCase());
                     tr.setAttribute('data-roll', roll);
                     
-                    // If it's the first row of the student's block, add Roll and Name with rowspan=6
+                    // First row of the block gets Roll and Name with rowspan=7
                     if (index === 0) {
-                        tr.innerHTML += '<td rowspan="6">' + roll + '</td>';
-                        tr.innerHTML += '<td rowspan="6">' + s.name + '</td>';
+                        tr.innerHTML += '<td rowspan="7">' + roll + '</td>';
+                        tr.innerHTML += '<td rowspan="7">' + s.name + '</td>';
                     }
                     tr.innerHTML += '<td>' + type + '</td>';
                     
-                    // 5. Fill in the marks for each subject in this row
+                    // 5. Fill in the data for each subject
                     subjects.forEach(subCode => {
-                        let m = s.subjects[subCode] || { isa:0, sea:0, credits:0, gp:0, grade:'-' };
-                        let val = 0;
+                        let m = s.subjects[subCode] || { isa: 0, sea: 0, credits: 0, gp: 0, grade: '-', cleared_in_sem: null };
+                        let val = "-";
                         
-                        // Determine which value to show based on the current row type
+                        // Map internal data to row types
                         if (type === "ISA") val = m.isa;
                         else if (type === "SEA") val = m.sea;
                         else if (type === "Total") val = (parseFloat(m.isa) || 0) + (parseFloat(m.sea) || 0);
                         else if (type === "Credits Earned") val = m.credits;
                         else if (type === "Grade Point") val = m.gp;
                         else if (type === "Grade") val = m.grade;
-                        
-                        // 6. Handle Edit Mode: Replace text with <input> fields
-                        // Note: "Total" is always read-only as it's a sum
+                        else if (type === "Cleared In") {
+                            val = m.cleared_in_sem ? "Sem " + m.cleared_in_sem : "-";
+                        }
+
+                        // Special cleanup for Semester 4 'undefined' values
                         if (selectedSem === "4") {
-        if (val === "undefined" || val === null || val === undefined || val === "") {
-            val = "-";
-        }
-    }
+                            if (val === "undefined" || val === null || val === "" || val === undefined) {
+                                val = "-";
+                            }
+                        }
+                        
+                        // 6. Rendering Logic (Edit vs View)
                         if (isEditMode && type !== "Total") {
-                            let inputType = (type === "Grade") ? "text" : "number";
+                            // Edit Mode: Show input fields
+                            let inputType = (type === "Grade" || type === "Cleared In") ? "text" : "number";
                             tr.innerHTML += '<td><input type="' + inputType + '" class="mark-input" value="' + val + '" data-roll="' + roll + '" data-sub="' + subCode + '" data-type="' + type + '"></td>';
                         } else {
-                            // Apply styling for non-editable rows
-                            let cellClass = (type === "Grade" || type === "Total") ? "row-total" : "";
+                            // View Mode: Apply styling
+                            let cellClass = "";
+                            if (type === "Grade" || type === "Total") {
+                                cellClass = "row-total";
+                            }
+                            
+                            // Highlight failures in red
+                            if (type === "Grade" && val === "F") {
+                                cellClass += " fail-grade";
+                            }
+                            
                             tr.innerHTML += '<td class="' + cellClass + '">' + val + '</td>';
                         }
                     });
                     tbody.appendChild(tr);
                 });
             }
+        })
+        .catch(err => {
+            console.error("Dashboard Load Error:", err);
+            tbody.innerHTML = "<tr><td colspan='10' style='color:red;'>Error loading data. Check console.</td></tr>";
         });
 }
 

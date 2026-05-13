@@ -53,6 +53,7 @@ public class UpdateSemesterMarksServlet extends HttpServlet {
                 else if (typeFromUI.equalsIgnoreCase("Credits Earned")) dbColumn = "credits";
                 else if (typeFromUI.equalsIgnoreCase("Grade Point")) dbColumn = "grade_point";
                 else if (typeFromUI.equalsIgnoreCase("Grade")) dbColumn = "grade";
+                else if (typeFromUI.equalsIgnoreCase("Cleared In")) dbColumn = "cleared_in_sem";
 
                 if (!dbColumn.isEmpty()) {
                     String sql = "INSERT INTO semester_marks (roll_no, subject_code, semester, " + dbColumn + ") " +
@@ -66,8 +67,9 @@ public class UpdateSemesterMarksServlet extends HttpServlet {
                         if (dbColumn.equals("grade")) {
                             pst.setString(4, valStr.isEmpty() ? "-" : valStr);
                         } else {
-                            // Convert to double to avoid SQL string-to-number crashes
-                            double numericVal = (valStr.isEmpty() || valStr.equals("-")) ? 0.0 : Double.parseDouble(valStr);
+                            // Logic to strip "Sem " if the user typed it, leaving only the number
+                            String cleanVal = valStr.replaceAll("[^0-9.]", ""); 
+                            double numericVal = (cleanVal.isEmpty()) ? 0.0 : Double.parseDouble(cleanVal);
                             pst.setDouble(4, numericVal);
                         }
                         pst.executeUpdate();
