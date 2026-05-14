@@ -63,7 +63,8 @@
 ---
 
 ## ⚙️ Installation & Setup
-
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/Parima15-creator/AcademiTrack.git
+2. Install Xampp and make sure Apache and MySQL are started
+3. Import Database into phpmyadmin
