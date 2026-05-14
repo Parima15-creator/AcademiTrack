@@ -52,6 +52,12 @@
 ## 📸 Screenshots
 
 <img width="1831" height="909" alt="image" src="https://github.com/user-attachments/assets/6817a204-5651-4abb-9b1e-69fc8302d936" />
+<img width="1810" height="793" alt="image" src="https://github.com/user-attachments/assets/7ec89085-dfc7-414f-bc49-bd0da1273879" />
+<img width="1834" height="831" alt="image" src="https://github.com/user-attachments/assets/9b2cdae5-27b2-4a1a-9eca-4d2fb461e7a9" />
+<img width="1920" height="1080" alt="Screenshot 2026-05-14 143719" src="https://github.com/user-attachments/assets/4a5eb519-0b89-4f9e-b785-8c1c2e5e2084" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/bd9bb39d-b370-455e-8681-546a61aa8c16" />
+
+
 
 
 ---
