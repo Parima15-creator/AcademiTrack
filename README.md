@@ -27,11 +27,11 @@ AcademiTrack is a Java-based web application designed for faculty members to eff
 To run this project locally, follow these steps:
 
 1. Prerequisites: 
-- XAMPP installed on your system.
+<br>XAMPP installed on your system.
 
-- JDK 17 or higher.
+<br>JDK 17 or higher.
 
-- Apache Tomcat 10.1 (to support jakarta.servlet packages).
+<br>Apache Tomcat 10.1 (to support jakarta.servlet packages).
 
 2. Database Setup
 - Open phpMyAdmin (localhost/phpmyadmin).
