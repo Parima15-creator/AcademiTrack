@@ -67,4 +67,16 @@
    ```bash
    git clone https://github.com/Parima15-creator/AcademiTrack.git
 2. Install Xampp and make sure Apache and MySQL are started
-3. Import Database into phpmyadmin
+3.  Open **phpMyAdmin** (`localhost/phpmyadmin`).
+4.  Create a new database named `academic_tracker`.
+5.  Navigate to the `Database/` folder in this repository.
+6.  Import the `academic_tracker.sql` file into your database.
+
+7.  Open the project in **NetBeans** or your preferred IDE.
+8.  Ensure the **MySQL Connector JAR** is added to the project libraries.
+9.  Check `LoginServlet.java` and `SignupServlet.java` to verify the database connection string:
+    *   `jdbc:mysql://localhost:3306/academic_tracker`, `user: "root"`, `password: ""`.
+  
+## ✒️ Author
+Parima Tendulkar<br>
+Don Bosco College Of Engineering
