@@ -56,5 +56,5 @@ Plaintext<br>
 ├── README.md                  # Project Documentation<br>
 └── .gitignore                 # Files to exclude from Git<br>
 
-##✒️ Author
-Parima Tendulkar - Initial Work - [Your GitHub Profile Link]
+## ✒️ Author
+Parima Tendulkar - Initial Work - https://github.com/Parima15-creator/AcademiTrack
