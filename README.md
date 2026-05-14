@@ -23,38 +23,38 @@ AcademiTrack is a Java-based web application designed for faculty members to eff
 
 - Libraries: Chart.js (via CDN), JDBC (MySQL Connector).
 
-📋 Installation & Setup
+## 📋 Installation & Setup
 To run this project locally, follow these steps:
 
-1. Prerequisites
-XAMPP (or any MySQL & Apache server).
+1. Prerequisites: 
+- XAMPP installed on your system.
 
-JDK 17 or higher.
+- JDK 17 or higher.
 
-Apache Tomcat 10.1 (to support jakarta.servlet packages).
+- Apache Tomcat 10.1 (to support jakarta.servlet packages).
 
 2. Database Setup
-Open phpMyAdmin (localhost/phpmyadmin).
+- Open phpMyAdmin (localhost/phpmyadmin).
 
-Create a new database named academic_tracker.
+- Create a new database named academic_tracker.
 
-Navigate to the Database/ folder in this repository.
+- Navigate to the Database/ folder in this repository.
 
-Import the academic_tracker.sql file into your newly created database.
+- Import the academic_tracker.sql file into your newly created database.
 
 3. Project Configuration
-Open the project in NetBeans or IntelliJ.
+- Open the project in NetBeans or IntelliJ.
 
-Ensure the MySQL Connector JAR is added to the project libraries.
+- Ensure the MySQL Connector JAR is added to the project libraries.
 
-Check LoginServlet.java and SignupServlet.java to verify the database connection string:
+- Check LoginServlet.java and SignupServlet.java to verify the database connection string:
 
-jdbc:mysql://localhost:3306/academic_tracker, user: "root", password: "".
+- jdbc:mysql://localhost:3306/academic_tracker, user: "root", password: "".
 
 4. Running the Application
-Right-click the project in your IDE and select Run.
+- Right-click the project in your IDE and select Run.
 
-The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/.
+- The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/index.html 
 
 📂 Project Structure
 Plaintext
@@ -64,5 +64,6 @@ Plaintext
 ├── Database/                  # SQL Database Export
 ├── README.md                  # Project Documentation
 └── .gitignore                 # Files to exclude from Git
-✒️ Author
-[Your Name] - Initial Work - [Your GitHub Profile Link]
+
+##✒️ Author
+Parima Tendulkar - Initial Work - [Your GitHub Profile Link]
