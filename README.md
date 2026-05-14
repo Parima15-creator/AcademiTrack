@@ -1,7 +1,7 @@
-## AcademiTrack - Academic Performance Tracker
+# AcademiTrack - Academic Performance Tracker
 AcademiTrack is a Java-based web application designed for faculty members to efficiently track and analyze student academic performance. It allows faculty to manage student records, input internal and semester marks, and visualize performance trends through interactive charts.
 
-# 🚀 Features
+## 🚀 Features
 - Secure Authentication: Faculty-specific login and registration system.
 
 - Student Management: Full CRUD (Create, Read, Update, Delete) capabilities for student records across different classes (FE, SE, TE, BE).
@@ -12,16 +12,16 @@ AcademiTrack is a Java-based web application designed for faculty members to eff
 
 - Session Security: Protected dashboard access ensuring only logged-in faculty can view data.
 
-#🛠️ Tech Stack
-Frontend: HTML5, CSS3, JavaScript (ES6+).
+## 🛠️ Tech Stack
+- Frontend: HTML5, CSS3, JavaScript (ES6+).
 
-Backend: Java Servlets (Jakarta EE).
+- Backend: Java Servlets (Jakarta EE).
 
-Database: MySQL.
+- Database: MySQL.
 
-Server: Apache Tomcat 10+.
+- Server: Apache Tomcat 10+.
 
-Libraries: Chart.js (via CDN), JDBC (MySQL Connector).
+- Libraries: Chart.js (via CDN), JDBC (MySQL Connector).
 
 📋 Installation & Setup
 To run this project locally, follow these steps:
