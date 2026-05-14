@@ -6,9 +6,9 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-    // Security Check: If the session variable 'facultyName' is missing, 
+    // Security Check: If the session variable 'Username' is missing, 
     // it means the user isn't logged in. Redirect them to the login page.
-    if (session.getAttribute("facultyName") == null) {
+    if (session.getAttribute("Username") == null) {
         response.sendRedirect("index.html");
     }
 %>
@@ -35,8 +35,8 @@
 
 <div class="main">
     <div class="user-welcome">
-        <!-- $ facultyName is an Expression Language (EL) tag. It automatically pulls the logged-in faculty's name from the session and displays it.-->
-        <span>Welcome, <strong>${facultyName}</strong> 👋</span>
+        <!-- $ Username is an Expression Language (EL) tag. It automatically pulls the logged-in faculty's name from the session and displays it.-->
+        <span>Welcome, <strong>${Username}</strong> 👋</span>
     </div>
 
     <h1>Semester - IT Marks</h1>

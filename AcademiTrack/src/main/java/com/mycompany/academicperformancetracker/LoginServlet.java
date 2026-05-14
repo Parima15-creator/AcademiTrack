@@ -18,8 +18,10 @@ public class LoginServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // 1. Get data from the HTML form (name="facultyName" in index.html)
-        String inputName = request.getParameter("facultyName");
-        String inputPass = request.getParameter("password");
+        String inputName = request.getParameter("Username");
+        String inputemail = request.getParameter("College_Email_ID");     
+        String inputdept = request.getParameter("Department");
+        String inputPass = request.getParameter("Password");
         
         // 2. Initialize the session once
         HttpSession session = request.getSession();
@@ -30,17 +32,18 @@ public class LoginServlet extends HttpServlet {
             Connection con = DriverManager.getConnection(
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
             
-            // 4. Corrected Query: Using 'full_name' as per your database
-            String query = "SELECT * FROM faculty WHERE full_name=? AND password=?";
+            String query = "SELECT * FROM faculty WHERE Username=? AND College_Email_ID=? AND Department=? AND Password=?";
             PreparedStatement pst = con.prepareStatement(query);
             pst.setString(1, inputName);
-            pst.setString(2, inputPass);
+            pst.setString(2, inputemail);
+            pst.setString(3, inputdept);
+            pst.setString(4, inputPass);
             
             ResultSet rs = pst.executeQuery();
 
             if (rs.next()) {
                 // SUCCESS: Save the name into the session
-                session.setAttribute("facultyName", inputName); 
+                session.setAttribute("Username", inputName); 
                 response.sendRedirect("dashboard.jsp");
             } else {
                 // FAILURE: Wrong credentials, send back to login with error

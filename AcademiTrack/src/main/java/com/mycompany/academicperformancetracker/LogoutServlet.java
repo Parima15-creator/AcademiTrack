@@ -37,7 +37,7 @@ public class LogoutServlet extends HttpServlet {
     
     if (session != null) {
         // 2. Clear all data in the session (facultyName, etc.)
-        session.removeAttribute("facultyName");
+        session.removeAttribute("Username");
         // 3. Destroy the session entirely
         session.invalidate();
     }

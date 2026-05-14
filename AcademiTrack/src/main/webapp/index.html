@@ -35,18 +35,33 @@
                 <div class="form-group">
                     <label>Faculty Name</label>
                     <!-- 'name' attribute is crucial; this is the key the server uses to find the data -->
-                    <input type="text" name="facultyName" placeholder="Enter your name" required>
+                    <input type="text" name="Username" placeholder="Enter your name" required>
+                </div>
+               <div class="form-group">
+                    <label>Faculty Email</label>
+                    <!-- 'name' attribute is crucial; this is the key the server uses to find the data -->
+                    <input type="email" name="College_Email_ID" placeholder="Enter your email" required>
+                </div>
+               <div class="form-group">
+                    <label>Department</label>
+                    <select name="Department">
+                        <option>Select Department</option>
+                        <option value="Computer">Computer Engineering</option>
+                        <option value="IT">Electronics and Computer Engineering</option>
+                        <option value="Mechanical">Mechanical Engineering</option>
+                        <option value="Civil">Civil Engineering</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" name="password" placeholder="Enter your password" required>
+                    <input type="password" name="Password" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" class="btn">Sign In</button>
             </form>
             <!-- Link to the registration page for new users -->
-            <p class="switch">Don't have an account? <a href="signup.html">Create Account</a></p>
+            <p class="switch" style="align-content: center">Don't have an account? <a href="signup.html">Create Account</a></p>
         </div>
-        <p class="copyright">© 2026 University Academic System. All rights reserved.</p>
+        <p class="copyright">Don Bosco College Of Engineering. All rights reserved.</p>
     </div>
 
     <script>

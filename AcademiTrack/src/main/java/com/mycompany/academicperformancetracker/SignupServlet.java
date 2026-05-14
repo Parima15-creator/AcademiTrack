@@ -23,9 +23,10 @@ public class SignupServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // 1. Get data from your HTML form fields
-        String name = request.getParameter("fullName");
-        String dept = request.getParameter("department");
-        String pass = request.getParameter("password");
+        String name = request.getParameter("Username");
+        String email = request.getParameter("College_Email_ID");
+        String dept = request.getParameter("Department");
+        String pass = request.getParameter("Password");
 
         try {
             // 2. Load the MySQL Driver
@@ -36,11 +37,14 @@ public class SignupServlet extends HttpServlet {
                 "jdbc:mysql://localhost:3306/academic_tracker", "root", "");
 
             // 4. Create the SQL Query to insert data into your 'faculty' table
-            String query = "INSERT INTO faculty (full_name, department, password) VALUES (?, ?, ?)";
+            String query = "INSERT INTO faculty (Username, College_Email_ID, Department, Password) VALUES (?, ?, ?, ?)";
             PreparedStatement pst = con.prepareStatement(query);
-            pst.setString(1, name);
-            pst.setString(2, dept);
-            pst.setString(3, pass);
+
+            // Map all 4 parameters to the query placeholders
+            pst.setString(1, name);  // Maps to Username
+            pst.setString(2, email); // Maps to College_Email_ID
+            pst.setString(3, dept);  // Maps to Department
+            pst.setString(4, pass);  // Maps to Password
 
             // 5. Execute the update
             int rowCount = pst.executeUpdate();

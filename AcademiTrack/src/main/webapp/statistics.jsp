@@ -1,5 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<% if (session.getAttribute("facultyName") == null) { response.sendRedirect("index.html"); } %>
+<% if (session.getAttribute("Username") == null) { response.sendRedirect("index.html"); } %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -47,7 +47,7 @@
 </div>
 
 <div class="main">
-    <div class="user-welcome"><span>Welcome, <strong>${facultyName}</strong> 👋</span></div>
+    <div class="user-welcome"><span>Welcome, <strong>${Username}</strong> 👋</span></div>
     <h1>Performance Analytics</h1>
     
     <div class="class-buttons" id="classGroup">

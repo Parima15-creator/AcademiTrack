@@ -12,19 +12,23 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh; /* Changed from height to min-height */
     margin: 0;
+    padding: 20px 0; /* Add padding so content doesn't touch screen edges */
     color: white;
 }
 
 .main-container {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
 }
 
-/* HEADER */
-.header {
-    margin-bottom: 20px;
+.header h1 {
+    font-size: 32px;
+    margin: 10px 0 20px; /* Add space below the title before the card starts */
+    font-weight: 700;
 }
 
 .logo-circle {
@@ -35,8 +39,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto 15px;
-    /* Remove 'color' and 'font-size' as they aren't needed for an image */
+    margin: 0 auto 5px;
     overflow: hidden; /* Ensures the image corners don't poke out */
 }
 
@@ -48,7 +51,7 @@ body {
 
 .header h1 {
     font-size: 30px;
-    margin: 5px 0;
+    margin: 0;
     font-weight: 700;
 }
 
@@ -64,9 +67,10 @@ body {
     color: #333;
     padding: 35px;
     border-radius: 18px;
-    width: 380px;
+    width: 90%; /* Responsive width */
+    max-width: 420px; /* Maximum size for desktop */
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-    margin: auto;
+    margin: 20px auto; /* Margin helps separate from header/footer */
 }
 
 .card h2 {
@@ -132,6 +136,7 @@ select {
 /* FOOTER */
 .copyright {
     font-size: 12px;
-    margin-top: 25px;
+    margin-top: 10px;
+    margin-bottom: 20px; /* Ensure space at the very bottom of the page */
     opacity: 0.7;
 }
