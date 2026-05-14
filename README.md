@@ -66,4 +66,4 @@
 
 1. **Clone the Repository:**
    ```bash
-   git clone [https://github.com/Parima15-creator/AcademiTrack.git](https://github.com/Parima15-creator/AcademiTrack.git)
+   git clone https://github.com/Parima15-creator/AcademiTrack.git
