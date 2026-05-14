@@ -53,7 +53,7 @@ public class GetStatisticsServlet extends HttpServlet {
                     }
                 }
                 
-                // --- 5. SUBJECT WITH HIGHEST FAILURE RATE ---
+                //4. SUBJECT WITH HIGHEST FAILURE RATE ---
                     
                 String failRateSql = "SELECT m.subject_code, s.subject_name, COUNT(*) as fail_count " +
                                      "FROM semester_marks m " +
@@ -79,8 +79,7 @@ public class GetStatisticsServlet extends HttpServlet {
                     }
                 }
                 
-                // --- 6. BACKLOG RECOVERY RATE ---
-                // --- 6. BACKLOG RECOVERY RATE (Class-Specific Fix) ---
+                // 5. BACKLOG RECOVERY RATE ---
                 String recoverySql = "SELECT COUNT(DISTINCT roll_no) as recovered_students " +
                      "FROM semester_marks " +
                      "WHERE cleared_in_sem = ? " + // Change IS NOT NULL to = ?
@@ -94,8 +93,7 @@ public class GetStatisticsServlet extends HttpServlet {
                         result.put("recoveredCount", rsRec.getInt("recovered_students"));
                     }
                 }
-                // --- 7. OVERALL CLASS TOPPERS (Semester-wide) ---
-                // --- 7. OVERALL CLASS TOPPERS (Using Analysis Logic) ---
+                // 6. OVERALL CLASS TOPPERS (Semester-wide) ---
                 JSONArray classToppers = new JSONArray();
                 // We use a JOIN with the subjects table to filter out is_honors = 1
                 String classTopSql = "SELECT s.name, " +
@@ -121,7 +119,8 @@ public class GetStatisticsServlet extends HttpServlet {
                 }
                 result.put("classToppers", classToppers);
                 result.put("classToppers", classToppers);
-                // 3. SUBJECT-WISE PASS %
+                
+                // 7. SUBJECT-WISE PASS %
                 JSONArray subStats = new JSONArray();
                 String rateSql = "SELECT subject_code, ROUND((COUNT(CASE WHEN grade!='F' THEN 1 END)*100.0/COUNT(*)),1) as rate " +
                  "FROM semester_marks WHERE TRIM(semester)=? " +
@@ -137,7 +136,7 @@ public class GetStatisticsServlet extends HttpServlet {
                 }
                 result.put("subjectStats", subStats);
 
-                // 4. TOPPERS
+                // 8. TOPPERS
                 if(subject != null && !subject.isEmpty()) {
                     JSONArray toppers = new JSONArray();
                     String topSql = "SELECT s.name, (m.isa_total + m.sea_marks) as total FROM students s JOIN semester_marks m ON s.roll_no=m.roll_no " +

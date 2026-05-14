@@ -4,19 +4,29 @@
  */
 package com.mycompany.academicperformancetracker;
 
+/**
+ * The Student class is a Data Transfer Object (DTO).
+ * It represents a single student record in the application's memory.
+ */
 public class Student {
     private int roll;
     private String name;
-    private double gpa; // Must match the variable used in your servlet [cite: 1683]
+    private double gpa; // Must match the variable used in your servlet
 
-    // This constructor matches the 'new Student(...)' call in your servlet [cite: 1683]
+    /**
+     * CONSTRUCTOR
+     * Used to initialize a Student object with data retrieved from the database.
+     */
     public Student(int roll, String name, double gpa) {
+        // Private fields: Encapsulation ensures these cannot be changed directly from outside
         this.roll = roll;
         this.name = name;
         this.gpa = gpa;
     }
-
+    
+    // --- GETTER METHODS ---
+    // These allow other classes (like Servlets or JSPs) to read the private data.
     public int getRoll() { return roll; }
     public String getName() { return name; }
-    public double getGpa() { return gpa; } // This matches s.getGpa() [cite: 1688]
+    public double getGpa() { return gpa; }
 }
