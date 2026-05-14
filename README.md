@@ -48,13 +48,13 @@ Right-click the project in your IDE and select Run.
 <br>The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/index.html <br>
 
 📂 Project Structure
-Plaintext
-├── AcademiTrack/              # Main Web Project
-│   ├── src/java/              # Java Servlets & Logic
-│   └── web/                   # HTML, JSP, CSS, and JS files
-├── Database/                  # SQL Database Export
-├── README.md                  # Project Documentation
-└── .gitignore                 # Files to exclude from Git
+Plaintext<br>
+├── AcademiTrack/              # Main Web Project<br>
+│   ├── src/java/              # Java Servlets & Logic<br>
+│   └── web/                   # HTML, JSP, CSS, and JS files<br>
+├── Database/                  # SQL Database Export<br>
+├── README.md                  # Project Documentation<br>
+└── .gitignore                 # Files to exclude from Git<br>
 
 ##✒️ Author
 Parima Tendulkar - Initial Work - [Your GitHub Profile Link]
