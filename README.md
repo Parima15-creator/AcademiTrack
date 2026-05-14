@@ -1,60 +1,63 @@
-# AcademiTrack - Academic Performance Tracker
-AcademiTrack is a Java-based web application designed for faculty members to efficiently track and analyze student academic performance. It allows faculty to manage student records, input internal and semester marks, and visualize performance trends through interactive charts.
+# 🎓 AcademiTrack - Academic Performance Tracker
 
-## 🚀 Features
-- Secure Authentication: Faculty-specific login and registration system.
+**AcademiTrack** is a robust, Java-based web application designed for faculty members to efficiently track, manage, and analyze student academic performance. The system streamlines the process of record-keeping, from basic student CRUD operations to complex SGPA/CGPA calculations and real-time data visualization.
 
-- Student Management: Full CRUD (Create, Read, Update, Delete) capabilities for student records across different classes (FE, SE, TE, BE).
+---
 
-- Performance Visualization: Interactive graphs and charts powered by Chart.js for student progress analysis.
+## 🚀 Key Features
 
-- Real-time Search: Quick filtering of student lists by name or roll number.
+### 🔐 Secure Authentication
+- **Faculty Portal:** Dedicated login and registration system for faculty members.
+- **Session Management:** Secure session handling to ensure data privacy and protected dashboard access.
 
-- Session Security: Protected dashboard access ensuring only logged-in faculty can view data.
+### 📋 Student Record Management (CRUD)
+- **Full Control:** Create, Read, Update, and Delete student records.
+- **Class Categorization:** Organize students across various academic years (FE, SE, TE, BE) and divisions.
+- **Real-time Search:** Instantly filter students by name or roll number for quick access.
 
-## 🛠️ Tech Stack
-- Frontend: HTML5, CSS3, JavaScript (ES6+).
+### ✍️ Dual Assessment Dashboards
+- **Internal Assessment (ISA):** Track ISA 1, ISA 2, ISA 3, and Assignment marks with automatic average calculation.
+- **Semester Results (SEA):** Record Semester End Examination marks, credits earned, and grade points.
+- **Automatic Sync:** Seamlessly sync marks between internal assessments and final semester results.
 
-- Backend: Java Servlets (Jakarta EE).
+### 📊 Advanced Analytics & Visualization
+- **Individual Student Profiles:** Deep-dive into student performance with automated SGPA and Overall CGPA calculations.
+- **Performance Trends:** Interactive line charts (Chart.js) showing a student's progress across semesters.
+- **Class-wide Statistics:** - Pass vs. Fail ratios (Donut Charts).
+  - Subject-wise passing percentages (Bar Charts).
+  - Identification of "Highest Failure" subjects and "Top 5 Performing Subjects."
+  - **Backlog Recovery Tracking:** Visualize students who have cleared previous backlogs.
 
-- Database: MySQL.
+---
 
-- Server: Apache Tomcat 10+.
+## 🛠 Tech Stack
 
-- Libraries: Chart.js (via CDN), JDBC (MySQL Connector).
+### **Frontend**
+- **Languages:** HTML5, CSS3, JavaScript (ES6+).
+- **Libraries:** [Chart.js](https://www.chartjs.org/) for interactive data visualization.
+- **Design:** Modern, responsive UI with a focus on usability and clean data presentation.
 
-## 📋 Installation & Setup
-To run this project locally, follow these steps:
+### **Backend**
+- **Core:** Java (Servlets & JSP).
+- **Server:** Apache Tomcat.
+- **Logic:** Custom algorithms for SGPA/CGPA calculation and result aggregation.
 
-1. Prerequisites:<br> 
-XAMPP installed on your system.
-<br>JDK 17 or higher.
-<br>Apache Tomcat 10.1 (to support jakarta.servlet packages).<br>
+### **Database**
+- **System:** MySQL.
+- **Management:** phpMyAdmin.
+- **Schema:** Optimized tables for Faculty credentials, Student profiles, and Semester-wise mark distribution.
 
-2. Database Setup<br>
-Open phpMyAdmin (localhost/phpmyadmin).
-<br>Create a new database named academic_tracker.
-<br>Navigate to the Database/ folder in this repository.
-<br>Import the academic_tracker.sql file into your newly created database.<br>
+---
 
-3. Project Configuration<br>
-Open the project in NetBeans or IntelliJ.
-<br>Ensure the MySQL Connector JAR is added to the project libraries.
-<br>Check LoginServlet.java and SignupServlet.java to verify the database connection string:
-<br>jdbc:mysql://localhost:3306/academic_tracker, user: "root", password: "".<br>
+## 📸 Screenshots
 
-4. Running the Application<br>
-Right-click the project in your IDE and select Run.
-<br>The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/index.html <br>
+<img width="1831" height="909" alt="image" src="https://github.com/user-attachments/assets/6817a204-5651-4abb-9b1e-69fc8302d936" />
 
-📂 Project Structure
-Plaintext<br>
-├── AcademiTrack/              # Main Web Project<br>
-│   ├── src/java/              # Java Servlets & Logic<br>
-│   └── web/                   # HTML, JSP, CSS, and JS files<br>
-├── Database/                  # SQL Database Export<br>
-├── README.md                  # Project Documentation<br>
-└── .gitignore                 # Files to exclude from Git<br>
 
-## ✒️ Author
-Parima Tendulkar - Initial Work - https://github.com/Parima15-creator/AcademiTrack
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/Parima15-creator/AcademiTrack.git](https://github.com/Parima15-creator/AcademiTrack.git)
