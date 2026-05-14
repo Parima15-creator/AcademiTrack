@@ -31,28 +31,21 @@ XAMPP installed on your system.
 <br>JDK 17 or higher.
 <br>Apache Tomcat 10.1 (to support jakarta.servlet packages).<br>
 
-2. Database Setup
-- Open phpMyAdmin (localhost/phpmyadmin).
+2. Database Setup<br>
+Open phpMyAdmin (localhost/phpmyadmin).
+<br>Create a new database named academic_tracker.
+<br>Navigate to the Database/ folder in this repository.
+<br>Import the academic_tracker.sql file into your newly created database.<br>
 
-- Create a new database named academic_tracker.
+3. Project Configuration<br>
+Open the project in NetBeans or IntelliJ.
+<br>Ensure the MySQL Connector JAR is added to the project libraries.
+<br>Check LoginServlet.java and SignupServlet.java to verify the database connection string:
+<br>jdbc:mysql://localhost:3306/academic_tracker, user: "root", password: "".<br>
 
-- Navigate to the Database/ folder in this repository.
-
-- Import the academic_tracker.sql file into your newly created database.
-
-3. Project Configuration
-- Open the project in NetBeans or IntelliJ.
-
-- Ensure the MySQL Connector JAR is added to the project libraries.
-
-- Check LoginServlet.java and SignupServlet.java to verify the database connection string:
-
-- jdbc:mysql://localhost:3306/academic_tracker, user: "root", password: "".
-
-4. Running the Application
-- Right-click the project in your IDE and select Run.
-
-- The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/index.html 
+4. Running the Application<br>
+Right-click the project in your IDE and select Run.
+<br>The application will deploy on Tomcat and open in your default browser at http://localhost:8080/AcademicPerformanceTracker/index.html <br>
 
 📂 Project Structure
 Plaintext
